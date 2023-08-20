@@ -4,7 +4,7 @@ import { Course, Lesson, User , Type} from '../interfaces/ICourse';
 import { Link } from 'react-router-dom';
 
 function MainCourse() {
-
+ 
     const [users, setUser] = useState<User[]>([]);
     const getUser = async() => {
         const apiUrl = "http://localhost:8080/users";
@@ -42,7 +42,16 @@ function MainCourse() {
             }
         });
     };
-    const courseElement = courses.map((course) => {
+
+    const [searchCourse, setSearchCourse] = useState('');
+    const [selectedType, setSelectedType] = useState('');
+    const filteredCourse = courses.filter((course) => {
+        const titleMatch = course.title.includes(searchCourse);
+        const typeMatch = selectedType === '' || course.type === selectedType;
+        return titleMatch && typeMatch;
+    })
+
+    const courseElement = filteredCourse.map((course) => {
         return (<div className='course-item'>
         <img src={require(`../images/${course.url}`)} />
         <h4>{course.title}</h4>
@@ -101,20 +110,30 @@ function MainCourse() {
         
     }, []);
 
+    useEffect(() => {
+        console.log(types);
+    }, [types]);
+
+    useEffect(()=>{
+        console.log(selectedType);
+        console.log(courses);
+    },[selectedType]);
+
     return (
         <div className='page'>
             <div className='header'>
                 Course
             </div>
             <div className='search-tab'>
-                <select name="types" id="types">
+                <select name="types" id="types" value={selectedType} onChange={(event) => setSelectedType(event.target.value)}>
+                    <option value="">เลือกประเภท</option>
                     {types.map((type) => (
                         <option key={type._id} value={type._id}>
                             {type.name}
                         </option>
                     ))}
                 </select>
-                    <input type="text" id='type' name='type'/>
+                <input type="text" id='type' name='type' placeholder='ค้นหา Course' value={searchCourse} onChange={(event) => setSearchCourse(event.target.value)}/>
             </div>
             <div className='course-grid'>
                 {courseElement}

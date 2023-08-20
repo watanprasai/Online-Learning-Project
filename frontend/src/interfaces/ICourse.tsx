@@ -16,7 +16,7 @@ export interface User {
     instructor: string;
     lessons: Lesson[];
     enrolledStudents: User[];
-    type: Type;
+    type: string;
     createdAt: Date;
     updatedAt: Date;
   }

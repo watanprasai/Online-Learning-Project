@@ -27,14 +27,33 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, img, ul, ol, li {
 .search-tab {
     display: flex;
     justify-content: center;
+    height: 45px;
 }
 
 .search-tab select {
-    margin-right: 10px;
+    margin-right: 20px;
+    border-radius: 10px;
+    font-size: 19px;
+    border: 0px;
+    width: 200px;
+    transition: all 0.5s;
 }
 
 .search-tab input {
-    margin-left: 10px;
+    margin-left: 20px;
+    border-radius: 10px;
+    font-size: 19px;
+    border: 0px;
+    transition: all 0.5s;
+}
+
+.search-tab select:focus,.search-tab input:focus {
+    outline: none;
+}
+
+
+.search-tab select:hover ,.search-tab input:hover {
+    background-color: #f0f0f0;
 }
 
 .course-grid {
