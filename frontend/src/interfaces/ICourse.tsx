@@ -11,6 +11,7 @@ export interface User {
   export interface Course {
     _id: string;
     title: string;
+    url: string;
     description: string;
     instructor: string;
     lessons: Lesson[];

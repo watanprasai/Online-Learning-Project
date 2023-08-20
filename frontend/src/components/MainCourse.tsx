@@ -41,6 +41,15 @@ function MainCourse() {
             }
         });
     };
+    const courseElement = courses.map((course) => {
+        return (<div className='course-item'>
+        <img src={require(`../images/${course.url}`)} />
+        <h4>{course.title}</h4>
+        </div>
+        );
+        
+    })
+
 
     const [types, setType] = useState<Type[]>([]);
     const getType = async() => {
@@ -91,41 +100,25 @@ function MainCourse() {
 
     return (
         <div className='page'>
-        <h1>All Users</h1>
-        <ul>
-            {users.map((user) => (
-            <li key={user._id}>
-                Username: {user.username}, Email: {user.email}
-            </li>
-            ))}
-        </ul>
-        <br/>
-        <h1>All Courses</h1>
-        <ul>
-            {courses.map((course) => (
-            <li key={course._id}>
-                Title: {course.title}, Description: {course.description}
-            </li>
-            ))}
-        </ul>
-        <br/>
-        <h1>All Lessons</h1>
-        <ul>
-            {lessons.map((lesson) => (
-            <li key={lesson._id}>
-                Title: {lesson.title}
-            </li>
-            ))}
-        </ul>
-        <br/>
-        <h1>All Types</h1>
-        <ul>
-            {types.map((type) => (
-            <li key={type._id}>
-                Name: {type.name}
-            </li>
-            ))}
-        </ul>
+            <div className='header'>
+                Course
+            </div>
+            <div className='search-tab'>
+                <select name="types" id="types">
+                    {types.map((type) => (
+                        <option key={type._id} value={type._id}>
+                            {type.name}
+                        </option>
+                    ))}
+                </select>
+                    <input type="text" id='type' name='type'/>
+            </div>
+            <div className='course-grid'>
+                {courseElement}
+            </div>
+            <div className='more-button'>
+                <button>ดูทั้งหมด</button>
+            </div>
         </div>
     )
 }

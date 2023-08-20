@@ -29,6 +29,7 @@ const courseSchema = new mongoose.Schema({
     lessons: [{type: mongoose.Schema.Types.ObjectId, ref: "Lesson"}],
     enrolledStudents: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
     type: [{type: mongoose.Schema.Types.ObjectId, ref:"Type"}],
+    url: String,
     createdAt: {type:Date , default: Date.now},
     updatedAt: {type:Date , default:Date.now},
 });
