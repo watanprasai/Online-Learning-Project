@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import './css/course.css'
 import { Course, Lesson, User , Type} from '../interfaces/ICourse';
+import { Link } from 'react-router-dom';
 
 function MainCourse() {
 
@@ -45,9 +46,11 @@ function MainCourse() {
         return (<div className='course-item'>
         <img src={require(`../images/${course.url}`)} />
         <h4>{course.title}</h4>
+        <Link to={`/courseDetail/${course._id}`}>
+            <button>ดูรายละเอียด</button>
+        </Link>
         </div>
         );
-        
     })
 
 
@@ -117,7 +120,9 @@ function MainCourse() {
                 {courseElement}
             </div>
             <div className='more-button'>
-                <button>ดูทั้งหมด</button>
+                <Link to='/allCourse'>
+                    <button>ดูทั้งหมด</button>
+                </Link>
             </div>
         </div>
     )
