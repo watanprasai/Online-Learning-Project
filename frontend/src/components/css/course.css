@@ -7,10 +7,9 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, img, ul, ol, li {
     vertical-align: baseline;
 }
   
-
-.page {
+.page1 {
     width: 100%;
-    height: 100vh;
+    height: 100%;
     background-color: #D8D9DA;
 }
 
@@ -31,6 +30,7 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, img, ul, ol, li {
 }
 
 .search-tab select {
+    padding-left: 10px;
     margin-right: 20px;
     border-radius: 10px;
     font-size: 19px;
@@ -40,6 +40,7 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, img, ul, ol, li {
 }
 
 .search-tab input {
+    padding-left: 10px;
     margin-left: 20px;
     border-radius: 10px;
     font-size: 19px;
@@ -84,6 +85,7 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, a, img, ul, ol, li {
 
 .more-button {
     padding-top: 30px;
+    padding-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: center;

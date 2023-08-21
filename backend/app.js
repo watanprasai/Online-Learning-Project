@@ -4,6 +4,7 @@ const cors = require('cors');
 
 const app = express();
 const PORT = 8080;
+
 app.use(cors());
 app.use(express.json());
 
@@ -16,6 +17,10 @@ const userSchema = new mongoose.Schema({
     username: String,
     email: String,
     password: String,
+    role: {
+        type: String,
+        default: "user"
+    },
     courseEnrolled: [{type: mongoose.Schema.Types.ObjectId, ref: 'Course'}],
     createdAt: {type:Date , default: Date.now},
     updatedAt: {type:Date , default:Date.now},
@@ -25,7 +30,7 @@ const User = mongoose.model('User', userSchema);
 const courseSchema = new mongoose.Schema({
     title: String,
     description: String,
-    instructor: String,
+    instructor: {type: mongoose.Schema.Types.ObjectId, ref: "User"},
     lessons: [{type: mongoose.Schema.Types.ObjectId, ref: "Lesson"}],
     enrolledStudents: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
     type: {type: mongoose.Schema.Types.ObjectId, ref:"Type"},
@@ -96,7 +101,9 @@ app.delete('/users/:id', async (req,res) =>{
 app.post('/courses', async (req,res) => {
     try {
         const course = new Course(req.body);
+        const instructor = await User.findById(req.body.instructor);
         const type = await Type.findById(req.body.type);
+        course.instructor = instructor;
         course.type = type;
         await course.save();
         res.status(201).json(course);

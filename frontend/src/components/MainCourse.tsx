@@ -107,20 +107,10 @@ function MainCourse() {
         getCourse();
         getType();
         getLesson();
-        
     }, []);
 
-    useEffect(() => {
-        console.log(types);
-    }, [types]);
-
-    useEffect(()=>{
-        console.log(selectedType);
-        console.log(courses);
-    },[selectedType]);
-
     return (
-        <div className='page'>
+        <div className='page1'>
             <div className='header'>
                 Course
             </div>
