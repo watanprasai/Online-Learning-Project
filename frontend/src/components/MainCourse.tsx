@@ -47,7 +47,7 @@ function MainCourse() {
     const [selectedType, setSelectedType] = useState('');
     const filteredCourse = courses.filter((course) => {
         const titleMatch = course.title.includes(searchCourse);
-        const typeMatch = selectedType === '' || course.type === selectedType;
+        const typeMatch = selectedType === '' || course.type._id === selectedType;
         return titleMatch && typeMatch;
     })
 
@@ -108,6 +108,11 @@ function MainCourse() {
         getType();
         getLesson();
     }, []);
+
+    useEffect(() => {
+        console.log(selectedType);
+    }, [selectedType]);
+    
 
     return (
         <div className='page1'>

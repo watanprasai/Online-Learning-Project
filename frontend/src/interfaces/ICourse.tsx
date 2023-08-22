@@ -13,10 +13,10 @@ export interface User {
     title: string;
     url: string;
     description: string;
-    instructor: string;
+    instructor: User;
     lessons: Lesson[];
     enrolledStudents: User[];
-    type: string;
+    type: Type;
     createdAt: Date;
     updatedAt: Date;
   }

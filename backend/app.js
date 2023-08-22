@@ -78,6 +78,15 @@ app.get('/users', async (req,res) => {
     }
 });
 
+app.get('/users/:id', async (req,res) => {
+    try {
+        const users = await User.findById(req.params.id);
+        res.json(users);
+    }catch (error){
+        res.status(500).json({ error: 'Cannot retrieve users' });
+    }
+});
+
 app.put('/users/:id', async (req,res) => {
     try {
         const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true});
@@ -114,10 +123,26 @@ app.post('/courses', async (req,res) => {
 
 app.get('/courses', async (req,res) => {
     try {
-        const courses = await Course.find();
+        const courses = await Course.find()
+        .populate('instructor', 'username email')
+        .populate('type', 'name');
         res.json(courses);
     }catch (error){
         res.status(500).json({ error: 'Cannot retrieve courses' });
+    }
+});
+
+app.get('/courses/:id', async (req,res) => {
+    try {
+        const course = await Course.findById(req.params.id)
+        .populate('instructor', 'username email')
+        .populate('type', 'name');
+        if (!course) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+        res.json(course);
+    }catch (error){
+        res.status(500).json({ error: 'Cannot retrieve course' });
     }
 });
 
@@ -141,15 +166,25 @@ app.delete('/courses/:id', async (req,res) =>{
 
 // Lesson CRUD
 
-app.post('/lessons', async (req,res) => {
+app.post('/lessons', async (req, res) => {
     try {
         const lesson = new Lesson(req.body);
+        const courseId = req.body.course;
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+        lesson.course = course;
         await lesson.save();
+
+        await Course.findByIdAndUpdate(courseId, { $push: { lessons: lesson._id } });
+
         res.status(201).json(lesson);
-    }catch (error){
-        res.status(400).json({error: 'Cannot create lesson'});
+    } catch (error) {
+        res.status(400).json({ error: 'Cannot create lesson' });
     }
 });
+
 
 app.get('/lessons', async (req,res) => {
     try {

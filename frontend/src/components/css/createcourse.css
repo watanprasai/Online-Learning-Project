@@ -15,7 +15,7 @@
     border-radius: 10px;
 }
 
-.line {
+.course-line {
     display: grid;
     grid-template-columns: 100px 1fr;
     align-items: center;
@@ -23,12 +23,71 @@
     padding-top: 30px;
 }
 
-.line input {
+.course-line input {
     width: 40%;
     height: 35px;
 }
 
-.line select {
+.course-line select {
     width: 41%;
+    height: 40px;
+}
+
+.course-create-button{
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-right: 40px;
+}
+
+.course-create-button button {
+    height: 40px;
+    width: 80px;
+    color: black;
+    background-color: rgb(127, 190, 0);
+    border: 0px;
+    border-radius: 10px;
+    transition: all 0.5s;
+    cursor: pointer;
+}
+
+.course-create-button button:hover {
+    color: white;
+    background-color: green;
+}
+
+.line-divider {
+    width: 95%;
+    margin-top: 30px;
+}
+
+.lesson-line {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    align-items: center;
+    padding-left: 40px;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    overflow: hidden;
+}
+
+.lesson-line .add-lesson-button {
+    border: 0px;
+    background-color: white;
+    margin-left: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 5px;
+}
+
+.lesson-line .add-lesson-button:hover {
+    transform: scale(1.08);
+}
+
+.lesson-line input {
+    width: 40%;
     height: 35px;
 }
+
