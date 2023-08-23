@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = 8080;
@@ -14,9 +16,18 @@ mongoose.connect(url, {useNewUrlParser: true , useUnifiedTopology: true})
 .catch((error) => { console.error('Cannot connect to MongoDB',error); });
 
 const userSchema = new mongoose.Schema({
-    username: String,
-    email: String,
-    password: String,
+    username: {
+        type: String,
+        require: true
+    },
+    email: {
+        type: String,
+        require: true
+    },
+    password: {
+        type: String,
+        require: true
+    },
     role: {
         type: String,
         default: "user"
@@ -28,13 +39,13 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 const courseSchema = new mongoose.Schema({
-    title: String,
+    title: {type:String,require:true},
     description: String,
-    instructor: {type: mongoose.Schema.Types.ObjectId, ref: "User"},
+    instructor: {type: mongoose.Schema.Types.ObjectId, ref: "User", require: true},
     lessons: [{type: mongoose.Schema.Types.ObjectId, ref: "Lesson"}],
     enrolledStudents: [{type: mongoose.Schema.Types.ObjectId, ref: "User"}],
-    type: {type: mongoose.Schema.Types.ObjectId, ref:"Type"},
-    url: String,
+    type: {type: mongoose.Schema.Types.ObjectId, ref:"Type", require: true},
+    url: {type: String,require:true},
     createdAt: {type:Date , default: Date.now},
     updatedAt: {type:Date , default:Date.now},
 });
@@ -58,16 +69,6 @@ const typeSchema = new mongoose.Schema({
 const Type = mongoose.model('Type', typeSchema);
 
 // User CRUD
-
-app.post('/users', async (req,res) => {
-    try {
-        const user = new User(req.body);
-        await user.save();
-        res.status(201).json(user);
-    }catch (error){
-        res.status(400).json({error: 'Cannot create user'});
-    }
-});
 
 app.get('/users', async (req,res) => {
     try {
@@ -102,6 +103,67 @@ app.delete('/users/:id', async (req,res) =>{
         res.json({ message: 'User deleted successfully'});
     }catch (error){
         res.status(400).json({ error: 'Cannot delete user' });
+    }
+});
+
+// Login and Sign Up
+
+// Register
+app.post('/register', async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+
+        if (!username) {
+            return res.status(400).json({ error: 'Missing username' });
+        }
+        if (!email) {
+            return res.status(400).json({ error: 'Missing email' });
+        }
+        if (!password) {
+            return res.status(400).json({ error: 'Missing password' });
+        }
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already in use' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = new User({
+            username,
+            email,
+            password: hashedPassword,
+        });
+
+        await newUser.save();
+        res.status(201).json(newUser);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot register user' });
+    }
+});
+
+// Login
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+
+        const token = jwt.sign({ userId: user._id }, 'j3eCq!2N#5ZdS9X*rF$GvHmTbQwKzE7a', { expiresIn: '1h' });
+        const userID = user._id;
+
+        res.json({ token , userID});
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot log in' });
     }
 });
 

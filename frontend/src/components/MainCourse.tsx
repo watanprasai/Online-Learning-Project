@@ -109,11 +109,6 @@ function MainCourse() {
         getLesson();
     }, []);
 
-    useEffect(() => {
-        console.log(selectedType);
-    }, [selectedType]);
-    
-
     return (
         <div className='page1'>
             <div className='header'>

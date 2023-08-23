@@ -1,0 +1,110 @@
+.page3 {
+    width: 100%;
+    height: 100%;
+    background-color: #D8D9DA;
+    height: 93vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.signin-container {
+    background-color: white;
+    height: 500px;
+    width: 450px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.sign-in {
+    padding-top: 80px;
+    font-size: 25px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.signin-button{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.signin-button a {
+    padding-right: 150px;
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    text-decoration: none;
+    color: dodgerblue;
+    font-weight: bold;
+}
+
+.signin-button a:hover {
+    color: rgb(3, 76, 150);
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+}
+
+.signin-button button {
+    border: 0px;
+    background-color: rgb(0, 119, 255);
+    height: 35px;
+    width: 75px;
+    border-radius: 5px;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: pointer;
+}
+
+.signin-button button:hover {
+    background-color: rgb(0, 97, 207);
+    transition: all 0.3s;
+}
+
+.signin-button button:active {
+    background-color: rgb(0, 78, 167);
+}
+
+.signup-container {
+    background-color: white;
+    height: 500px;
+    width: 450px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.signup {
+    padding-top: 80px;
+    font-size: 25px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.signup-container .signup-button {
+    border: 0px;
+    background-color: rgb(0, 119, 255);
+    height: 35px;
+    width: 75px;
+    border-radius: 5px;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: pointer;
+}
+
+.signup-container .signup-button:hover {
+    background-color: rgb(0, 97, 207);
+    transition: all 0.3s;
+}
+
+.signup-container .signup-button:active {
+    background-color: rgb(0, 78, 167);
+}
