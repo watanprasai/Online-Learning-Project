@@ -298,10 +298,28 @@ app.post('/login', async (req, res) => {
 app.post('/courses', async (req,res) => {
     try {
         const course = new Course(req.body);
+        const { title , description , url } = req.body
         const instructor = await User.findById(req.body.instructor);
         const type = await Type.findById(req.body.type);
         course.instructor = instructor;
         course.type = type;
+
+        if (!instructor) {
+            return res.status(404).json({ error: 'โปรดใส่ชื่อผู้สอน' });
+        }
+
+        if (!title) {
+            return res.status(400).json({ error: 'โปรดใส่ชื่อคอร์ส' });
+        }
+
+        if (!description) {
+            return res.status(400).json({ error: 'โปรดใส่คำอธิบายคอร์ส' });
+        }
+
+        if (!url) {
+            return res.status(400).json({ error: 'โปรดใส่ URL หน้าปก' });
+        }
+
         await course.save();
         res.status(201).json(course);
     }catch (error){
@@ -358,11 +376,25 @@ app.post('/lessons', async (req, res) => {
     try {
         const lesson = new Lesson(req.body);
         const courseId = req.body.course;
+        const { title , content , videoURL } = req.body;
         const course = await Course.findById(courseId);
         if (!course) {
             return res.status(404).json({ error: 'Course not found' });
         }
         lesson.course = course;
+
+        if (!title) {
+            return res.status(400).json({ error: 'โปรดใส่ชื่อเนื้้อหา' });
+        }
+
+        if (!content) {
+            return res.status(400).json({ error: 'โปรดใส่เนื้อหาการสอน' });
+        }
+
+        if (!videoURL) {
+            return res.status(400).json({ error: 'โปรดใส่ลิ้งวิดีโอ' });
+        }
+
         await lesson.save();
 
         await Course.findByIdAndUpdate(courseId, { $push: { lessons: lesson._id } });

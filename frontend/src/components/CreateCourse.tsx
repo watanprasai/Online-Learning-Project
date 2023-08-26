@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSave , faCirclePlus} from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2';
 
 function CreateCourse() {
     const navigate = useNavigate();
@@ -50,7 +51,7 @@ function CreateCourse() {
         })
     }
 
-    const submit = () => {
+    const submit = async() => {
         let data = {
             "title": title,
             "description": description,
@@ -64,17 +65,25 @@ function CreateCourse() {
             headers: { "Content-Type" : "application/json",},
             body: JSON.stringify(data),
         }
-        fetch(apiUrl,option)
-        .then((res) => res.json())
-        .then((res) => {
-            if(res){
-                console.log(res);
-                navigate(`/createLesson`,{state : {courseID: res._id}});
-                alert("Create course succeed");
-            }else {
-                alert("Can not create course");
-            }
-        });
+        const res = await fetch(apiUrl,option);
+        const message = await res.json();
+        
+        if(res.ok){
+            await Swal.fire({
+                title: 'สร้าง Course สำเร็จ',
+                text: 'ระบบจะพาท่านไปที่หน้าเพิ่มเนื้อหา',
+                icon: 'success',
+                confirmButtonText: 'รับทราบ'
+            });
+            navigate(`/createLesson`,{state : {courseID: message._id}});
+        }else {
+            await Swal.fire({
+                title: 'สร้าง Course ไม่สำเร็จ',
+                text: message.error,
+                icon: 'error',
+                confirmButtonText: 'รับทราบ'
+            });
+        }
     }
 
     useEffect(() => {

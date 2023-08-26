@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSave , faCirclePlus} from '@fortawesome/free-solid-svg-icons';
 import { useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 function CreateLesson() {
     const location = useLocation();
@@ -32,7 +33,7 @@ function CreateLesson() {
         })
     }
 
-    const submit = () => {
+    const submit = async() => {
         let data = {
             "course" : courseID,
             "title" : lessonTitle,
@@ -45,15 +46,26 @@ function CreateLesson() {
             headers : { "Content-Type" : "application/json"},
             body : JSON.stringify(data),
         }
-        fetch(apiUrl,option)
-        .then((res) => res.json())
-        .then((res) => {
-            if(res){
-                alert("Add lesson successfully");
-            }else {
-                alert("Can not add lesson");
-            }
-        });
+        const res = await fetch(apiUrl,option);
+        const message = await res.json();
+        if(res.ok){
+            await Swal.fire({
+                title: 'สร้าง Lesson สำเร็จ',
+                text: 'เพิ่มเนื้อหาใหม่โดยการกดปุ่มบันทึก',
+                icon: 'success',
+                confirmButtonText: 'รับทราบ'
+            });
+            setLessonTitle("");
+            setContent("");
+            setVideoUrl("");
+        }else {
+            await Swal.fire({
+                title: 'สร้าง Lesson ไม่สำเร็จ',
+                text: message.error,
+                icon: 'error',
+                confirmButtonText: 'รับทราบ'
+            });
+        }
     }
 
     useEffect(() => {

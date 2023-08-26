@@ -5,6 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import './css/signinsignup.css';
@@ -19,8 +20,8 @@ function SignUp() {
 
     const [visible, setVisible] = useState(false);
 
-    const handleVisibility = () => {
-        setVisible(!visible);
+    const handleVisibility = (state: boolean) => {
+        setVisible(state);
     };
 
     const [otp, setOtp] = useState<string[]>(["", "", "", "", ""]);
@@ -57,7 +58,7 @@ function SignUp() {
         return (
             <div className="otp-popup">
             <div className="otp-form">
-                <div className="otp-icon" onClick={handleVisibility}><FontAwesomeIcon icon={faAngleLeft} size='xl'/></div>
+                <div className="otp-icon" onClick={() => handleVisibility(false)}><FontAwesomeIcon icon={faAngleLeft} size='xl'/></div>
                 <label className='otp-header'>Enter verification code</label>
                 <p>โปรดกรอกรหัส OTP ที่ส่งไปในอีเมลที่คุณใช้ในการสมัคร</p>
                 <div className="otp-input-container">
@@ -82,7 +83,7 @@ function SignUp() {
                     ))}
                 </div>
                 <div className="otp-text">
-                    <p>หากไม่ได้รับรหัส OTP</p><button className='send-again-button'>ส่งรหัสผ่านอีกครั้ง</button>
+                    <p>หากไม่ได้รับรหัส OTP</p><button className='send-again-button' onClick={generateOTP}>ส่งรหัสผ่านอีกครั้ง</button>
                 </div>
                 <div className='otp-button'>
                     <button className="otp-clear-button" onClick={clearOtp}>Clear</button>
@@ -108,8 +109,20 @@ function SignUp() {
             const data = await response.json();
 
             if (response.ok) {
-                handleVisibility()
+                handleVisibility(true);
+                Swal.fire({
+                    title: 'ส่งรหัส OTP เรียบร้อยแล้ว',
+                    text: 'โปรดเช็ครหัส OTP ที่อีเมลที่ใช้ในการสมัคร',
+                    icon: 'success',
+                    confirmButtonText: 'รับทราบ'
+                });
             } else {
+                Swal.fire({
+                    title: 'ส่งรหัส OTP ไม่สำเร็จ',
+                    text: 'กรุณากรอกข้อมูลให้ถูกต้อง',
+                    icon: 'error',
+                    confirmButtonText: 'รับทราบ'
+                });
                 console.error('Registration failed', data.error);
             }
         }catch (error){
@@ -148,17 +161,32 @@ function SignUp() {
             if (response.ok) {
                 const responseRegister = await fetch(apiUrlregister, requestOptionsRegister);
                 const dataRegister = await responseRegister.json();
+                await Swal.fire({
+                        title: 'ลงทะเบียนสำเร็จ',
+                        text: 'ระบบจะพาท่านไปที่หน้า SignIn',
+                        icon: 'success',
+                        confirmButtonText: 'รับทราบ'
+                });
                 if (responseRegister.ok) {
-                    alert("Register Successfully");
-                    handleVisibility();
+                    handleVisibility(false);
                     navigate('/');
                     window.location.reload();
                 }
                 else {
-                    alert(dataRegister.error);
+                    Swal.fire({
+                        title: 'Cannot register',
+                        text: dataRegister.error,
+                        icon: 'error',
+                        confirmButtonText: 'รับทราบ'
+                    });
                 }
             } else {
-                console.error('Registration failed', data.error);
+                Swal.fire({
+                    title: 'รหัส OTP ไม่ถูกต้องหรือหมดอายุ',
+                    text: 'โปรดตรวจสอบรหัส OTP ของท่าน',
+                    icon: 'error',
+                    confirmButtonText: 'รับทราบ'
+                });
             }
         } catch (error) {
             console.error('Registration failed', error);

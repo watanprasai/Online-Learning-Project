@@ -5,6 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Swal from 'sweetalert2';
 import './css/signinsignup.css';
 
 function SignIn() {
@@ -26,6 +27,12 @@ function SignIn() {
             const data = await response.json();
 
             if (response.ok) {
+                await Swal.fire({
+                    title: 'เข้าสู่ระบบสำเร็จ',
+                    text: 'ระบบจะพาท่านไปที่หน้าหลัก',
+                    icon: 'success',
+                    confirmButtonText: 'รับทราบ'
+                });
                 const token = data.token;
                 const _id = data.userID;
                 localStorage.setItem('token', token);
@@ -33,6 +40,12 @@ function SignIn() {
                 navigate('/Course'); 
                 window.location.reload();
             } else {
+                await Swal.fire({
+                    title: 'อีเมล หรือ รหัสผ่าน ไม่ถูกต้อง',
+                    text: 'โปรดตรวจสอบอีเมล และ รหัสผ่าน',
+                    icon: 'error',
+                    confirmButtonText: 'รับทราบ'
+                });
                 console.error('Login failed', data.error);
             }
         } catch (error) {
