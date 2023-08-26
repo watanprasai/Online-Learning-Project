@@ -24,52 +24,40 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const html_template = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Confirmation</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .confirmation-box {
-            padding: 20px;
-            border-radius: 4px;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-    <div class="confirmation-box">
-        <h1>Email Confirmation</h1>
-        <p>Thank you for signing up! Please enter the following confirmation code:</p>
-        <h2 style="background-color: #f0f0f0; padding: 10px; border-radius: 4px;">${Math.floor(Math.random() * (99999 - 10000 + 1) ) + 10000}</h2>
-        <p>If you did not sign up for our service, you can safely ignore this email.</p>
-    </div>
-</body>
-</html>
-`
-
-const mailOptions = {
-    from: 'o.learing.with.me@gmail.com',
-    to: 'lollolpuet@gmail.com',
-    subject: 'Email verifacation form Online Learning',
-    html: html_template
-};
-
-transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-      console.log(error);
-    } else {
-      console.log('Email sent: ' + info.response);
-    }
-  });
+function return_html(otpNumber){
+    const html_template = `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Email Confirmation</title>
+        <style>
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .confirmation-box {
+                padding: 20px;
+                border-radius: 4px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="confirmation-box">
+            <h1>Email Confirmation</h1>
+            <p>Thank you for signing up! Please enter the following confirmation code:</p>
+            <h2 style="background-color: #f0f0f0; padding: 10px; border-radius: 4px;">${otpNumber}</h2>
+            <p>If you did not sign up for our service, you can safely ignore this email.</p>
+        </div>
+    </body>
+    </html>
+    `
+    return html_template;
+}
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -123,6 +111,88 @@ const typeSchema = new mongoose.Schema({
     updatedAt: {type:Date , default:Date.now},
 });
 const Type = mongoose.model('Type', typeSchema);
+
+const otpSchema = new mongoose.Schema({
+    otp: {
+        type: Number,
+        required: true,
+    },
+    email: {
+        type: String,
+        required: true,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+    expiredAt: {
+        type: Date,
+        default: function () {
+            return new Date(+this.createdAt + 5 * 60 * 1000); // หมดอายุใน 5 นาที
+        },
+    },
+});
+const Otp = mongoose.model('Otp', otpSchema);
+
+// Generate OTP
+app.post('/getOTP', async (req,res) => {
+    try {
+        const otp = Math.floor(Math.random() * (99999 - 10000 + 1) ) + 10000;
+        const email = req.body.email;
+        const otpData = new Otp({
+            otp: otp,
+            email: email,
+        });
+        const existingEmail = await User.findOne({ email });
+        if (existingEmail) {
+            return res.status(400).json({ error: 'Email already in use' });
+        }
+        await otpData.save();
+
+        const mailOptions = {
+            from: 'o.learing.with.me@gmail.com',
+            to: email,
+            subject: 'Email verifacation form Online Learning',
+            html: return_html(otp)
+        };
+        
+        transporter.sendMail(mailOptions, function(error, info){
+            if (error) {
+              console.log(error);
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+        });
+
+        res.status(200).json({status:"ok"});
+    }catch {
+        res.status(500).json({ error: 'Cannot generate OTP' });
+    }
+});
+
+// Check OTP
+app.post('/checkOTP', async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        const otpData = await Otp.findOne({ email, otp });
+        if (!otpData) {
+            return res.status(400).json({ error: 'Invalid OTP' });
+        }
+
+        const currentTime = new Date();
+        if (otpData.expiredAt < currentTime) {
+            return res.status(400).json({ error: 'OTP has expired' });
+        }
+
+        await Otp.findByIdAndDelete(otpData._id);
+
+        res.status(200).json({ status: 'ok' });
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot check OTP' });
+    }
+});
+
 
 // User CRUD
 
