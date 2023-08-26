@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = 8080;
@@ -14,6 +15,61 @@ const url = 'mongodb://localhost:27017/online_learning';
 mongoose.connect(url, {useNewUrlParser: true , useUnifiedTopology: true})
 .then(() => { console.log('Connected to MongoDB'); })
 .catch((error) => { console.error('Cannot connect to MongoDB',error); });
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'o.learing.with.me@gmail.com',
+        pass: 'plibzccwuzuwbheg'
+    }
+});
+
+const html_template = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Confirmation</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .confirmation-box {
+            padding: 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="confirmation-box">
+        <h1>Email Confirmation</h1>
+        <p>Thank you for signing up! Please enter the following confirmation code:</p>
+        <h2 style="background-color: #f0f0f0; padding: 10px; border-radius: 4px;">${Math.floor(Math.random() * (99999 - 10000 + 1) ) + 10000}</h2>
+        <p>If you did not sign up for our service, you can safely ignore this email.</p>
+    </div>
+</body>
+</html>
+`
+
+const mailOptions = {
+    from: 'o.learing.with.me@gmail.com',
+    to: 'lollolpuet@gmail.com',
+    subject: 'Email verifacation form Online Learning',
+    html: html_template
+};
+
+transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
 
 const userSchema = new mongoose.Schema({
     username: {
