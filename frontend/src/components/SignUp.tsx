@@ -52,12 +52,7 @@ function SignUp() {
         setOtp(["", "", "", "", ""]);
         inputRefs.current[0]?.focus();
     };
-
-    const sendOtp = () => {
-        const fullOtp = otp.join("");
-        alert(`Sending OTP: ${fullOtp}`);
-    }
- 
+    
     const registerPopup = () => {
         return (
             <div className="otp-popup">
@@ -91,28 +86,77 @@ function SignUp() {
                 </div>
                 <div className='otp-button'>
                     <button className="otp-clear-button" onClick={clearOtp}>Clear</button>
-                    <button className="otp-send-button" onClick={sendOtp}>Send</button>
+                    <button className="otp-send-button" onClick={handleSubmit}>Send</button>
                 </div>
             </div>
         </div>
         );
     };
 
-    const handleSubmit = async () => {
+    const generateOTP = async() => {
         try {
-            const apiUrl = 'http://localhost:8080/register';
+            let info = {
+                "email" : email
+            }
+            const apiUrl = 'http://localhost:8080/getOTP';
             const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify(info),
             };
-
             const response = await fetch(apiUrl, requestOptions);
             const data = await response.json();
 
             if (response.ok) {
-                navigate('/'); 
-                window.location.reload();
+                handleVisibility()
+            } else {
+                console.error('Registration failed', data.error);
+            }
+        }catch (error){
+            console.error('Registration failed', error);
+        }
+    }
+
+    const handleSubmit = async () => {
+        try {
+            const fullOtp = otp.join("");
+            let otpInfo = {
+                "email" : email,
+                "otp" : fullOtp
+            }
+            const apiUrlcheckOTP = 'http://localhost:8080/checkOTP';
+            const requestOptionsOTP = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(otpInfo),
+            };
+            let regInfo = {
+                "username" : username,
+                "email" : email,
+                "password" : password
+            }
+            const apiUrlregister= 'http://localhost:8080/register';
+            const requestOptionsRegister = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(regInfo),
+            };
+
+            const response = await fetch(apiUrlcheckOTP, requestOptionsOTP);
+            const data = await response.json();
+
+            if (response.ok) {
+                const responseRegister = await fetch(apiUrlregister, requestOptionsRegister);
+                const dataRegister = await responseRegister.json();
+                if (responseRegister.ok) {
+                    alert("Register Successfully");
+                    handleVisibility();
+                    navigate('/');
+                    window.location.reload();
+                }
+                else {
+                    alert(dataRegister.error);
+                }
             } else {
                 console.error('Registration failed', data.error);
             }
@@ -156,7 +200,7 @@ function SignUp() {
                         }}
                     />
                 </div>
-                <button type="submit" onClick={handleVisibility} className='signup-button'>Sign Up</button>
+                <button type="submit" onClick={generateOTP} className='signup-button'>Sign Up</button>
             </div> 
         </div>
     );
