@@ -13,9 +13,7 @@ function SignIn() {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const handleSubmit = async () => {
         try {
             const apiUrl = 'http://localhost:8080/login';
             const requestOptions = {

@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import { useState , useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
-import './css/signinsignup.css';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import './css/signinsignup.css';
+import './css/otp.css'
 
 function SignUp() {
     const navigate = useNavigate(); 
@@ -14,9 +17,88 @@ function SignUp() {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const [visible, setVisible] = useState(false);
 
+    const handleVisibility = () => {
+        setVisible(!visible);
+    };
+
+    const [otp, setOtp] = useState<string[]>(["", "", "", "", ""]);
+    const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+
+    const handleInputChange = (index: number, value: string) => {
+        const newOtp = [...otp];
+        newOtp[index] = value;
+
+        if (value.length === 1 && index < otp.length - 1) {
+            inputRefs.current[index + 1]?.focus();
+        }
+
+        setOtp(newOtp);
+    };
+
+    const handleBackspace = (index: number, value: string) => {
+        const newOtp = [...otp];
+        newOtp[index] = value;
+
+        if (value.length === 0 && index > 0) {
+            inputRefs.current[index - 1]?.focus();
+        }
+
+        setOtp(newOtp);
+    };
+
+    const clearOtp = () => {
+        setOtp(["", "", "", "", ""]);
+        inputRefs.current[0]?.focus();
+    };
+
+    const sendOtp = () => {
+        const fullOtp = otp.join("");
+        alert(`Sending OTP: ${fullOtp}`);
+    }
+ 
+    const registerPopup = () => {
+        return (
+            <div className="otp-popup">
+            <div className="otp-form">
+                <div className="otp-icon" onClick={handleVisibility}><FontAwesomeIcon icon={faAngleLeft} size='xl'/></div>
+                <label className='otp-header'>Enter verification code</label>
+                <p>โปรดกรอกรหัส OTP ที่ส่งไปในอีเมลที่คุณใช้ในการสมัคร</p>
+                <div className="otp-input-container">
+                    {otp.map((digit, index) => (
+                        <input
+                            key={index}
+                            type="text"
+                            value={digit}
+                            maxLength={1}
+                            ref={ref => (inputRefs.current[index] = ref)}
+                            onInput={(e) => {
+                                e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '');
+                            }}
+                            onChange={(e) => handleInputChange(index, e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Backspace') {
+                                    handleBackspace(index, '');
+                                }
+                            }}
+                            className="otp-input"
+                        />
+                    ))}
+                </div>
+                <div className="otp-text">
+                    <p>หากไม่ได้รับรหัส OTP</p><button className='send-again-button'>ส่งรหัสผ่านอีกครั้ง</button>
+                </div>
+                <div className='otp-button'>
+                    <button className="otp-clear-button" onClick={clearOtp}>Clear</button>
+                    <button className="otp-send-button" onClick={sendOtp}>Send</button>
+                </div>
+            </div>
+        </div>
+        );
+    };
+
+    const handleSubmit = async () => {
         try {
             const apiUrl = 'http://localhost:8080/register';
             const requestOptions = {
@@ -41,6 +123,7 @@ function SignUp() {
 
     return (
         <div className='page3'>
+            {visible && registerPopup()}
             <div className="signup-container">
                 <label className='signup'>Sign Up</label>
                 <div>
@@ -73,7 +156,7 @@ function SignUp() {
                         }}
                     />
                 </div>
-                <button type="submit" onClick={handleSubmit} className='signup-button'>Sign Up</button>
+                <button type="submit" onClick={handleVisibility} className='signup-button'>Sign Up</button>
             </div> 
         </div>
     );
