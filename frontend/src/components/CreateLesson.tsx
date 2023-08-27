@@ -12,7 +12,13 @@ function CreateLesson() {
 
     const [lessonTitle, setLessonTitle] = useState('');
     const [content, setContent] = useState('');
-    const [videoUrl, setVideoUrl] = useState('');
+
+    const [videoFile, setVideo] = useState(null);
+
+    const handleVideoChange = (event: any) => {
+        const selectedVideo = event.target.files[0];
+        setVideo(selectedVideo);
+    }
 
     const [course, setCourse] = useState<Course>();
     const getCourseByID = async() => {
@@ -34,11 +40,21 @@ function CreateLesson() {
     }
 
     const submit = async() => {
+        const video = new FormData();
+        video.append('file', videoFile || "");
+        const apiUrlUpload = "http://localhost:8080/upload";
+        const optionUpload = {
+            method: "POST",
+            body: video,
+        };
+        const videoRes = await fetch(apiUrlUpload, optionUpload)
+        const videoName = await videoRes.json()
+
         let data = {
             "course" : courseID,
             "title" : lessonTitle,
             "content" : content,
-            "videoURL" : videoUrl
+            "videoURL" : videoName
         };
         const apiUrl = "http://localhost:8080/lessons";
         const option = {
@@ -57,7 +73,6 @@ function CreateLesson() {
             });
             setLessonTitle("");
             setContent("");
-            setVideoUrl("");
         }else {
             await Swal.fire({
                 title: 'สร้าง Lesson ไม่สำเร็จ',
@@ -112,7 +127,10 @@ function CreateLesson() {
                     <input type="text" id='lesson-title' name='lesson-title' placeholder='กรอกชื่อเนื้อหาการสอน' value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)}/>
                 </div>
                 <div className="lesson-line">เนื้อหา<input type="text" id='content' name='content' placeholder='กรอกรายละเอียดเนื้อหา' value={content} onChange={(event) => setContent(event.target.value)}/></div>
-                <div className="lesson-line">Video<input type="text" id='videoUrl' name='videoUrl' placeholder='กรอก url Video การเรียนการสอน' value={videoUrl} onChange={(event) => setVideoUrl(event.target.value)}/></div>
+                <div className="lesson-line-upload">
+                    Video
+                    <input type="file" id='video' name='video' onChange={handleVideoChange} />
+                </div>
                 <div className="course-create-button">
                     <button onClick={submit}>บันทึก <FontAwesomeIcon icon={faSave} /></button>
                 </div>

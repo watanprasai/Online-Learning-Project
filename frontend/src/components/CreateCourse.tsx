@@ -20,7 +20,6 @@ function CreateCourse() {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [url, setUrl] = useState('');
     const [types, setType] = useState<Type[]>([]);
     const [selectedType, setSelectedType] = useState('');
     const getType = () => {

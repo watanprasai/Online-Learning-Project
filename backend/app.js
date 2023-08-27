@@ -10,7 +10,7 @@ const generateRandomString = require('./controller/generate.js')
 const multer = require('multer');
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        callback(null, './images')
+        callback(null, './files')
     },
     filename: function (req, file, callback) {
         const timestamp = new Date().getTime();

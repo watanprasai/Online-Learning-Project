@@ -81,6 +81,16 @@
     overflow: hidden;
 }
 
+.lesson-line-upload {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    align-items: center;
+    padding-left: 40px;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    overflow: hidden;
+}
+
 .lesson-line .add-lesson-button {
     border: 0px;
     background-color: white;
