@@ -3,9 +3,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(0, 0, 0, 0.295);
+    background-color: rgba(0, 0, 0, 0.637);
     width: 100vw;
-    height: 90%;
+    height: 90.5%;
     z-index: 99;
     padding-top: 28px;
 }
