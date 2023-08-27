@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 
 function CreateCourse() {
+    const _id = localStorage.getItem('_id') || "";
     const navigate = useNavigate();
-    const [userID , setUserID] = useState("64da7b0959e38b181c753a3c");
     const [user , setUser] = useState<User>();
 
     const [title, setTitle] = useState('');
@@ -16,7 +16,7 @@ function CreateCourse() {
     const [url, setUrl] = useState('');
     const [types, setType] = useState<Type[]>([]);
     const [selectedType, setSelectedType] = useState('');
-    const getType = async() => {
+    const getType = () => {
         const apiUrl = "http://localhost:8080/types";
         const option = {
             method: "GET",
@@ -33,8 +33,8 @@ function CreateCourse() {
             }
         })
     }
-    const getUserbyID = async() => {
-        const apiUrl = `http://localhost:8080/users/${userID}`;
+    const getUserbyID = () => {
+        const apiUrl = `http://localhost:8080/users/${_id}`;
         const option = {
             method : "GET",
             headers : { "Content-Type" : "application/json"},  
@@ -43,7 +43,7 @@ function CreateCourse() {
         .then((res) => res.json())
         .then((res) => {
             if (res){
-                setUser(res);
+                setUser(res)
             }
             else {
                 alert("Can not get user by _id");
@@ -55,7 +55,7 @@ function CreateCourse() {
         let data = {
             "title": title,
             "description": description,
-            "instructor": userID,
+            "instructor": _id,
             "type": selectedType,
             "url":url
         };
