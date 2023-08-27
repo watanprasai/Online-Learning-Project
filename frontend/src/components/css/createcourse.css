@@ -23,6 +23,14 @@
     padding-top: 30px;
 }
 
+.course-line-upload {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    align-items: center;
+    padding-left: 40px;
+    padding-top: 30px;
+}
+
 .course-line input {
     width: 40%;
     height: 35px;

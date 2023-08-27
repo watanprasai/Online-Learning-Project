@@ -5,6 +5,23 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
+const generateRandomString = require('./controller/generate.js')
+
+const multer = require('multer');
+const storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null, './images')
+    },
+    filename: function (req, file, callback) {
+        const timestamp = new Date().getTime();
+        const ext = file.originalname.split('.').pop();
+        const randomNumber = generateRandomString(10);
+        const newName = `${timestamp}-${randomNumber}.${ext}`;
+        callback(null, newName);
+    },
+})
+const upload = multer({ storage })
+
 const app = express();
 const PORT = 8080;
 
@@ -169,6 +186,10 @@ app.post('/getOTP', async (req,res) => {
         res.status(500).json({ error: 'Cannot generate OTP' });
     }
 });
+
+app.post('/upload', upload.single('file'), (req, res) => {
+    res.json(req.file.filename);
+})
 
 // Check OTP
 app.post('/checkOTP', async (req, res) => {

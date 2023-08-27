@@ -11,6 +11,13 @@ function CreateCourse() {
     const navigate = useNavigate();
     const [user , setUser] = useState<User>();
 
+    const [file, setFile] = useState(null);
+
+    const handleFileChange = (event: any) => {
+        const selectedFile = event.target.files[0];
+        setFile(selectedFile);
+    }
+
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [url, setUrl] = useState('');
@@ -52,12 +59,23 @@ function CreateCourse() {
     }
 
     const submit = async() => {
+
+        const photo = new FormData();
+        photo.append('file', file || "");
+        const apiUrlUpload = "http://localhost:8080/upload";
+        const optionUpload = {
+            method: "POST",
+            body: photo,
+        };
+        const photoRes = await fetch(apiUrlUpload, optionUpload)
+        const photoName = await photoRes.json()
+   
         let data = {
             "title": title,
             "description": description,
             "instructor": _id,
             "type": selectedType,
-            "url":url
+            "url": photoName
         };
         const apiUrl = "http://localhost:8080/courses";
         const option = {
@@ -120,9 +138,9 @@ function CreateCourse() {
                         ))}
                     </select>
                 </div>
-                <div className='course-line'>
+                <div className='course-line-upload'>
                     รูปปก
-                    <input type="text" id='url' name='url' placeholder='กรอก url รูปหน้าปก' value={url} onChange={(event) => setUrl(event.target.value)}/>
+                    <input type="file" id='file' name='file' onChange={handleFileChange} />
                 </div>
                 <div className="course-create-button">
                     <button onClick={submit}>บันทึก <FontAwesomeIcon icon={faSave} /></button>

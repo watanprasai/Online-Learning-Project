@@ -53,7 +53,7 @@ function MainCourse() {
 
     const courseElement = filteredCourse.map((course) => {
         return (<div className='course-item'>
-        <img src={require(`../images/${course.url}`)} />
+        <img src={require(`../../../backend/images/${course.url}`)} />
         <h4>{course.title}</h4>
         <Link to={`/courseDetail/${course._id}`}>
             <button>ดูรายละเอียด</button>
