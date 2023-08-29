@@ -8,6 +8,7 @@ import CreateLesson from './components/CreateLesson';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import NavbarNotSignIn from './components/NavbarNotSignIn';
+import CourseDetail from './components/CourseDetail';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -25,6 +26,7 @@ function App() {
        <Route path="/Course" element={<Course />} />
        <Route path='/createCourse' element={<CreateCourse/>}/>
        <Route path='/createLesson' element={<CreateLesson/>}/>
+       <Route path='/courseDetail/:courseId' element={<CourseDetail/>}></Route>
    </Routes>
    </div>
   </Router>

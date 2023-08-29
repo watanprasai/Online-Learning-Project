@@ -10,7 +10,7 @@ const generateRandomString = require('./controller/generate.js')
 const multer = require('multer');
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
-        callback(null, './files')
+        callback(null, '../frontend/src/files')
     },
     filename: function (req, file, callback) {
         const timestamp = new Date().getTime();
@@ -305,7 +305,7 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
 
-        const token = jwt.sign({ userId: user._id }, 'j3eCq!2N#5ZdS9X*rF$GvHmTbQwKzE7a', { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user._id , username: user.username}, 'j3eCq!2N#5ZdS9X*rF$GvHmTbQwKzE7a', { expiresIn: '1h' });
         const userID = user._id;
 
         res.json({ token , userID});
@@ -352,7 +352,8 @@ app.get('/courses', async (req,res) => {
     try {
         const courses = await Course.find()
         .populate('instructor', 'username email')
-        .populate('type', 'name');
+        .populate('type', 'name')
+        .populate('lessons', 'title content videoURL');
         res.json(courses);
     }catch (error){
         res.status(500).json({ error: 'Cannot retrieve courses' });
@@ -363,7 +364,8 @@ app.get('/courses/:id', async (req,res) => {
     try {
         const course = await Course.findById(req.params.id)
         .populate('instructor', 'username email')
-        .populate('type', 'name');
+        .populate('type', 'name')
+        .populate('lessons', 'title content videoURL');
         if (!course) {
             return res.status(404).json({ error: 'Course not found' });
         }

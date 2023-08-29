@@ -54,7 +54,7 @@ function CreateLesson() {
             "course" : courseID,
             "title" : lessonTitle,
             "content" : content,
-            "videoURL" : videoName
+            "videoURL" : videoName,
         };
         const apiUrl = "http://localhost:8080/lessons";
         const option = {
