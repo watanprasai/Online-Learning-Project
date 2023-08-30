@@ -187,6 +187,42 @@ app.post('/getOTP', async (req,res) => {
     }
 });
 
+app.post('/checkEmail', async(req,res) => {
+    try {
+        const otp = Math.floor(Math.random() * (99999 - 10000 + 1) ) + 10000;
+        const email = req.body.forgetemail;
+        const otpData = new Otp({
+            otp: otp,
+            email: email,
+        });
+        const existingEmail = await User.findOne({ email });
+        if (!existingEmail) {
+            console.log("Can not find email");
+            return res.status(400).json({ error: 'Have not found your email'});
+        }
+        await otpData.save();
+
+        const mailOptions = {
+            from: 'o.learing.with.me@gmail.com',
+            to: email,
+            subject: 'Recovery your password',
+            html: return_html(otp)
+        };
+        
+        transporter.sendMail(mailOptions, function(error, info){
+            if (error) {
+              console.log(error);
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+        });
+
+        res.status(200).json({status:"ok"});
+    }catch (error) {
+        res.status(500).json({ error: 'Cannot generate OTP' });
+    };
+});
+
 app.post('/upload', upload.single('file'), (req, res) => {
     res.json(req.file.filename);
 })
@@ -213,6 +249,36 @@ app.post('/checkOTP', async (req, res) => {
         res.status(500).json({ error: 'Cannot check OTP' });
     }
 });
+
+// Reset Password
+app.post('/resetPassword',async(req,res) => {
+    try {
+        const { email , password } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ error: 'Missing email' });
+        }
+        if (!password) {
+            return res.status(400).json({ error: 'Missing new password' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password,10);
+
+        const updatedUser = await User.findOneAndUpdate(
+            { email: email},
+            { password: hashedPassword},
+            { new: true}
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.status(200).json({ message: 'Password reset successful' });
+        
+    }catch (error) {
+        res.status(500).json({ error: 'Cannot reset password' });
+    }
+})
 
 
 // User CRUD

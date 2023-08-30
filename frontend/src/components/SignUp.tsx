@@ -156,7 +156,6 @@ function SignUp() {
             };
 
             const response = await fetch(apiUrlcheckOTP, requestOptionsOTP);
-            const data = await response.json();
 
             if (response.ok) {
                 const responseRegister = await fetch(apiUrlregister, requestOptionsRegister);
