@@ -1,0 +1,74 @@
+.course-detail-page {
+    width: 100%;
+    height: 100%;
+    background-color: #D8D9DA;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 16px;
+}
+
+.course-detail-container {
+    margin-top: 50px;
+    padding-top: 75px;
+    background-color: white;
+    width: 1400px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.course-detail-course {
+    display: flex;
+    gap: 80px;
+}
+
+.course-detail-image {
+    width: 560px;
+    height: 320px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.course-detail-right {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.course-detail-right-header {
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.course-detail-enroll {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.enroll-button {
+    border: 0;
+    background-color: gray;
+    color: white;
+    width: 140px;
+    height: 50px;
+    font-size: 18px;
+    border-radius: 8px;
+    transition: 0.4s;
+}
+
+.enroll-button:hover {
+    background-color: rgb(180, 180, 180);
+}
+
+.enroll-button:active {
+    transform: scale(0.98);
+    background-color: rgb(102, 97, 97);
+}

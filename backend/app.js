@@ -5,7 +5,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
-const generateRandomString = require('./controller/generate.js')
+const generateRandomString = require('./controller/generate.js');
+const authMiddleware = require('./controller/middleware.js');
 
 const multer = require('multer');
 const storage = multer.diskStorage({
@@ -356,6 +357,12 @@ app.post('/register', async (req, res) => {
     }
 });
 
+
+// Test Check Token
+app.get('/secure-route', authMiddleware, (req, res) => {
+    res.json({ message: 'This is a secure route' });
+});
+
 // Login
 app.post('/login', async (req, res) => {
     try {
@@ -377,6 +384,38 @@ app.post('/login', async (req, res) => {
         res.json({ token , userID});
     } catch (error) {
         res.status(500).json({ error: 'Cannot log in' });
+    }
+});
+
+// Enroll in a course
+app.post('/courses/:id/enroll', authMiddleware,async (req, res) => {
+    try {
+        const courseId = req.params.id;
+        const userId = req.userData.userId; // เอามาจาก token ถ้า token ถูกต้อง
+
+        const course = await Course.findById(courseId);
+        const user = await User.findById(userId);
+
+        if (!course) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (user.courseEnrolled.includes(courseId)) {
+            return res.status(400).json({ error: 'User is already enrolled in this course' });
+        }
+
+        course.enrolledStudents.push(userId);
+        await course.save();
+
+        user.courseEnrolled.push(courseId);
+        await user.save();
+
+        res.status(200).json({ message: 'Enrolled in the course successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to enroll in the course' });
     }
 });
 
