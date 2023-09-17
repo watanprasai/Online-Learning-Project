@@ -22,6 +22,15 @@ function CreateLesson() {
    
 
     const handleQuestionSubmit = () => {
+
+        if (!lessonTitle || !question || options.some((option) => !option) || !selectedCorrectOption) {
+            Swal.fire({
+                icon: 'error',
+                title: 'ข้อมูลไม่ครบ',
+                text: 'กรุณากรอกข้อมูลให้ครบทุกช่อง',
+            });
+            return; 
+        }
         console.log('บันทึกคำถาม:', { question, options, selectedCorrectOption });
         const optionIds : string[] = [];
         let correctOptionID = '';
@@ -49,7 +58,11 @@ function CreateLesson() {
                     }
                 })
                 .catch((error) => {
-                    console.error('เกิดข้อผิดพลาดในการสร้างตัวเลือก:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เกิดข้อผิดพลาด',
+                        text: error,
+                    });
                 });
         });
     
@@ -91,9 +104,18 @@ function CreateLesson() {
                 setOptions(['', '', '']);
                 setSelectedCorrectOption('');
                 setLessonTitle('');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'บันทึกสำเร็จ',
+                    text: 'คำถามของคุณถูกบันทึกแล้ว',
+                });
             })
             .catch((error) => {
-                console.error('เกิดข้อผิดพลาดในการสร้างคำถาม (quiz):', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: error,
+                });
             });
     };
     
@@ -140,49 +162,56 @@ function CreateLesson() {
 
     const createQuizForm = () => {
         return (
-            <div>
-            <h2>สร้างคำถาม (quiz)</h2>
-            <div >
-                    หัวข้อ
-                    <input type="text" id='lesson-title' name='lesson-title' placeholder='กรอกชื่อหัวข้อ' value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)}/>
+            <div className="quiz-form">
+                <div className="form-group">
+                    <label htmlFor="lesson-title">หัวข้อ:</label>
+                    <input type="text" id="lesson-title" name="lesson-title" placeholder="กรอกชื่อหัวข้อ" value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)} className="custom-input" />
                 </div>
-            <div>
-                <label>คำถาม:</label>
-                <input
-                    type="text"
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                />
-            </div>
-            {options.map((option, index) => (
-                <div key={index}>
-                    <label>ตัวเลือก {index + 1}:</label>
+                <div className="form-group">
+                    <label htmlFor="question">คำถาม:</label>
                     <input
                         type="text"
-                        value={option}
-                        onChange={(e) => handleOptionChange(index, e.target.value)}
+                        id="question"
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        className="custom-input"
                     />
-                    <button onClick={() => handleRemoveOption(index)}>ลบ</button>
                 </div>
-            ))}
-            <div>
-                <label>ตัวเลือกที่ถูกต้อง:</label>
-                <select
-                    value={selectedCorrectOption}
-                    onChange={(e) => setSelectedCorrectOption(e.target.value)}
-                >
-                    <option value="">เลือกตัวเลือกที่ถูกต้อง</option>
-                    {options.map((option, index) => (
-                        <option key={index} value={option}>
-                            {option}
-                        </option>
-                    ))}
-                </select>
+                {options.map((option, index) => (
+                    <div className="form-group-choice" key={index}>
+                        <label htmlFor={`option-${index}`}>ตัวเลือก {index + 1}:</label>
+                        <input
+                            type="text"
+                            id={`option-${index}`}
+                            value={option}
+                            onChange={(e) => handleOptionChange(index, e.target.value)}
+                            className="custom-input"
+                        />
+                        <button onClick={() => handleRemoveOption(index)} className="custom-button">ลบ</button>
+                    </div>
+                ))}
+                <div className="form-group">
+                    <label htmlFor="selectedCorrectOption">ตัวเลือกที่ถูกต้อง:</label>
+                    <select
+                        id="selectedCorrectOption"
+                        value={selectedCorrectOption}
+                        onChange={(e) => setSelectedCorrectOption(e.target.value)}
+                        className="custom-select"
+                    >
+                        <option value="">เลือกตัวเลือกที่ถูกต้อง</option>
+                        {options.map((option, index) => (
+                            <option key={index} value={option}>
+                                {option}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="custom-button-line">
+                    <button onClick={handleAddOption} className="custom-button-add-option">เพิ่มตัวเลือก</button>
+                    <button onClick={handleQuestionSubmit} className="custom-button-submit-question">บันทึกคำถาม</button>
+                </div>
             </div>
-            <button onClick={handleAddOption}>เพิ่มตัวเลือก</button>
-            <button onClick={handleQuestionSubmit}>บันทึกคำถาม</button>
-        </div>
-        )
+        );
     }
 
     const [course, setCourse] = useState<Course>();

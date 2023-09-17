@@ -1,10 +1,11 @@
 .page2 {
     width: 100%;
-    height: 100vh;
+    height: 100%;
     background-color: #D8D9DA;
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-bottom: 40px;
 }
 
 .course-create-container {
@@ -13,6 +14,7 @@
     width: 1000px;
     background-color: white;
     border-radius: 10px;
+    padding-bottom: 20px;
 }
 
 .course-line {
@@ -104,3 +106,106 @@
     height: 35px;
 }
 
+.quiz-form {
+    max-width: 800px;
+    margin-left: 40px;
+}
+
+.form-group {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.form-group-choice {
+    display: grid;
+    grid-template-columns: 100px 1fr 60px;
+    align-items: center;
+    padding-bottom: 10px;
+}
+
+.form-group-choice label {
+    margin-right: 10px;
+    white-space: nowrap;
+}
+
+.custom-input,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 16px;
+}
+
+.custom-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.custom-button:hover {
+    background-color: #0056b3; /* เปลี่ยนสีเมื่อ hover สำหรับปุ่มทั่วไป */
+}
+
+.custom-button-add-option {
+    background-color: #d1830d;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s; 
+}
+
+.custom-button-submit-question {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.custom-button-add-option:hover {
+    background-color: #c27a0d;
+}
+
+.custom-button-submit-question:hover {
+    background-color: #1e7e34;
+}
+
+.custom-button:active {
+    background-color: #004080;
+}
+
+.custom-button-add-option:active {
+    background-color: #9e630c;
+}
+
+.custom-button-submit-question:active {
+    background-color: #155724;
+}
+
+.custom-button-line {
+    display: flex;
+    gap: 20px;
+}
+
+.btn-add-option {
+    background-color: #28a745;
+}
+
+.btn-submit-question {
+    background-color: #dc3545;
+}
