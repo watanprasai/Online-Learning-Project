@@ -91,17 +91,12 @@
     overflow: hidden;
 }
 
-.lesson-line .add-lesson-button {
-    border: 0px;
-    background-color: white;
-    margin-left: 20px;
-    cursor: pointer;
-    transition: all 0.3s;
-    width: 5px;
+.lesson-choice {
+    display: flex;
 }
 
-.lesson-line .add-lesson-button:hover {
-    transform: scale(1.08);
+.lesson-choice-line {
+    display: flex;
 }
 
 .lesson-line input {

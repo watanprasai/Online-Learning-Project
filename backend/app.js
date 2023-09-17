@@ -117,11 +117,28 @@ const lessonSchema = new mongoose.Schema({
     course: [{type: mongoose.Schema.Types.ObjectId, ref: 'Course'}],
     title: String,
     content: String,
+    quiz: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' },
     videoURL: String,
     createdAt: {type:Date , default: Date.now},
     updatedAt: {type:Date , default:Date.now},
 });
 const Lesson = mongoose.model('Lesson', lessonSchema);
+
+const quizSchema = new mongoose.Schema({
+    question: { type: String, required: true },
+    options: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Option', required: true }],
+    correctOption: { type: mongoose.Schema.Types.ObjectId, ref: 'Option', required: true },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+});
+const Quiz = mongoose.model('Quiz', quizSchema);
+
+const optionSchema = new mongoose.Schema({
+    option: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now},
+    updatedAt: { type: Date, default: Date.now }
+});
+const Option = mongoose.model('Option', optionSchema);
 
 const typeSchema = new mongoose.Schema({
     name: String,
@@ -151,6 +168,62 @@ const otpSchema = new mongoose.Schema({
     },
 });
 const Otp = mongoose.model('Otp', otpSchema);
+
+// Quiz
+app.post('/lessons/:lessonId/quizzes', authMiddleware, async (req, res) => {
+    try {
+        const { question, options, correctOption } = req.body;
+        const lessonId = req.params.lessonId;
+
+        const newQuiz = new Quiz({
+            question,
+            options,
+            correctOption,
+        });
+
+        await newQuiz.save();
+
+        await Lesson.findByIdAndUpdate(lessonId, { $push: {quiz: newQuiz._id }});
+        
+        res.status(201).json(newQuiz);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot create quiz in lesson' });
+    }
+});
+
+
+// Option
+app.post('/options', authMiddleware, async (req, res) => {
+    try {
+        const option = req.body.option;
+
+        const newOption = new Option({
+            option,
+        });
+
+        await newOption.save();
+        
+        res.status(201).json({ _id: newOption._id });
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot create option' });
+    }
+});
+
+app.get('/options/:quizId', async (req, res) => {
+    try {
+        const quizId = req.params.quizId;
+
+        const options = await Option.find({ quiz: quizId });
+
+        if (!options) {
+            return res.status(404).json({ error: 'Options not found for this quiz' });
+        }
+
+        res.json(options);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot retrieve options' });
+    }
+});
 
 // Generate OTP
 app.post('/getOTP', async (req,res) => {
@@ -458,7 +531,8 @@ app.get('/courses', async (req,res) => {
         const courses = await Course.find()
         .populate('instructor', 'username email')
         .populate('type', 'name')
-        .populate('lessons', 'title content videoURL');
+        .populate('lessons', 'title content videoURL')
+        .populate('enrolledStudents', '_id username email');
         res.json(courses);
     }catch (error){
         res.status(500).json({ error: 'Cannot retrieve courses' });
@@ -470,7 +544,8 @@ app.get('/courses/:id', async (req,res) => {
         const course = await Course.findById(req.params.id)
         .populate('instructor', 'username email')
         .populate('type', 'name')
-        .populate('lessons', 'title content videoURL');
+        .populate('lessons', 'title content videoURL')
+        .populate('enrolledStudents', '_id username email');
         if (!course) {
             return res.status(404).json({ error: 'Course not found' });
         }
@@ -499,6 +574,20 @@ app.delete('/courses/:id', async (req,res) =>{
 });
 
 // Lesson CRUD
+
+app.post('/lessons-quiz', authMiddleware, async(req,res) => {
+    const lesson = new Lesson(req.body)
+    const courseId = req.body.course;
+    const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+    lesson.course = course;
+    await lesson.save();
+    
+    await Course.findByIdAndUpdate(courseId, { $push: { lessons: lesson._id } });
+    res.status(201).json({_id : lesson._id});
+})
 
 app.post('/lessons', async (req, res) => {
     try {

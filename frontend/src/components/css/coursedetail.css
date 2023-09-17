@@ -1,6 +1,6 @@
 .course-detail-page {
     width: 100%;
-    height: 100%;
+    height: 95vh;
     background-color: #D8D9DA;
     display: flex;
     flex-direction: column;
@@ -55,20 +55,87 @@
 
 .enroll-button {
     border: 0;
-    background-color: gray;
+    background-color: #007bff; 
     color: white;
     width: 140px;
     height: 50px;
     font-size: 18px;
     border-radius: 8px;
     transition: 0.4s;
+    cursor: pointer;
 }
 
 .enroll-button:hover {
-    background-color: rgb(180, 180, 180);
+    background-color: #0056b3;
 }
 
 .enroll-button:active {
     transform: scale(0.98);
-    background-color: rgb(102, 97, 97);
+    background-color: #003070; 
+}
+
+.enrolled-message {
+    color: #28a745;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
+.enrolled-message {
+    color: #28a745;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.course-detail-registered {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.start-button {
+    width: 80px;
+    height: 35px;
+    border: 0;
+    background-color: #009419; 
+    color: white;
+    font-size: 18px;
+    border-radius: 8px;
+    transition: 0.4s;
+    cursor: pointer;
+}
+
+.start-button:hover {
+    background-color: #0056b3;
+}
+
+.start-button:active {
+    transform: scale(0.98);
+    background-color: #003070; 
+}
+
+.course-detail-lesson-container {
+    width: 70%;
+    margin-bottom: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.course-detail-lesson {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(170, 169, 169);
+    padding-top: 10px;
+    padding-left: 50px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border: 1px solid black;
+}
+
+.course-detail-lesson-header {
+    font-size: 20px;
+    font-weight: bold;
 }

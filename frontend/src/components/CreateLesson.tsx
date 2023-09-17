@@ -1,23 +1,188 @@
-import { Course, Lesson, User , Type} from '../interfaces/ICourse';
+import { Course } from '../interfaces/ICourse';
 import './css/createcourse.css'
 import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave , faCirclePlus} from '@fortawesome/free-solid-svg-icons';
+import { faSave, faTeeth } from '@fortawesome/free-solid-svg-icons';
 import { useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 function CreateLesson() {
     const location = useLocation();
     const courseID = location.state.courseID;
+    const token = localStorage.getItem('token') || "";
 
     const [lessonTitle, setLessonTitle] = useState('');
     const [content, setContent] = useState('');
 
     const [videoFile, setVideo] = useState(null);
 
+    const [question, setQuestion] = useState('');
+    const [options, setOptions] = useState(['', '', '']); // เริ่มต้นด้วย 3 ตัวเลือก
+    const [selectedCorrectOption, setSelectedCorrectOption] = useState('');
+   
+
+    const handleQuestionSubmit = () => {
+        console.log('บันทึกคำถาม:', { question, options, selectedCorrectOption });
+        const optionIds : string[] = [];
+        let correctOptionID = '';
+    
+        const optionPromises = options.map((optionText) => {
+            const apiUrlOption = `http://localhost:8080/options`;
+            const optionOption = {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization" : `${token}`
+                },
+                body: JSON.stringify({ option: optionText })
+            };
+    
+            return fetch(apiUrlOption, optionOption)
+                .then((res) => res.json())
+                .then((res) => {
+                    if (res) {
+                        if (selectedCorrectOption === optionText) {
+                            correctOptionID = res._id;
+                        }
+                        optionIds.push(res._id);
+                        return res._id;
+                    }
+                })
+                .catch((error) => {
+                    console.error('เกิดข้อผิดพลาดในการสร้างตัวเลือก:', error);
+                });
+        });
+    
+        Promise.all(optionPromises)
+            .then(() => {
+                console.log('Option IDs:', optionIds);
+                console.log('Correct Option ID:', correctOptionID);
+    
+                return fetch('http://localhost:8080/lessons-quiz', {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Authorization" : `${token}`
+                    },
+                    body: JSON.stringify({ title: lessonTitle , course : courseID})
+                });
+            })
+            .then((res) => res.json())
+            .then((res) => {
+                if (res) {
+                    const apiUrlQuiz = `http://localhost:8080/lessons/${res._id}/quizzes`;
+                    const optionQuiz = {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization" : `${token}`
+                        },
+                        body: JSON.stringify({
+                            question: question,
+                            options: optionIds,
+                            correctOption: correctOptionID
+                        })
+                    };
+                    return fetch(apiUrlQuiz, optionQuiz);
+                }
+            })
+            .then(() => {
+                setQuestion('');
+                setOptions(['', '', '']);
+                setSelectedCorrectOption('');
+                setLessonTitle('');
+            })
+            .catch((error) => {
+                console.error('เกิดข้อผิดพลาดในการสร้างคำถาม (quiz):', error);
+            });
+    };
+    
+
+    const handleOptionChange = (index: number, value: string) => {
+        const updatedOptions = [...options];
+        updatedOptions[index] = value;
+        setOptions(updatedOptions);
+    };
+
+    const handleAddOption = () => {
+        setOptions([...options, '']);
+    };
+
+    const handleRemoveOption = (index: number) => {
+        const updatedOptions = [...options];
+        updatedOptions.splice(index, 1);
+        setOptions(updatedOptions);
+    };
+
     const handleVideoChange = (event: any) => {
         const selectedVideo = event.target.files[0];
         setVideo(selectedVideo);
+    }
+
+    const addVideoForm = () => {
+        return (
+            <div>
+                <div className="lesson-line">
+                    หัวข้อ
+                    <input type="text" id='lesson-title' name='lesson-title' placeholder='กรอกชื่อเนื้อหาการสอน' value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)}/>
+                </div>
+                <div className="lesson-line">เนื้อหา<input type="text" id='content' name='content' placeholder='กรอกรายละเอียดเนื้อหา' value={content} onChange={(event) => setContent(event.target.value)}/></div>
+                <div className="lesson-line-upload">
+                    Video
+                    <input type="file" id='video' name='video' onChange={handleVideoChange} />
+                </div>
+                <div className="course-create-button">
+                    <button onClick={submit}>บันทึก <FontAwesomeIcon icon={faSave} /></button>
+                </div>
+            </div>
+        )
+    }
+
+    const createQuizForm = () => {
+        return (
+            <div>
+            <h2>สร้างคำถาม (quiz)</h2>
+            <div >
+                    หัวข้อ
+                    <input type="text" id='lesson-title' name='lesson-title' placeholder='กรอกชื่อหัวข้อ' value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)}/>
+                </div>
+            <div>
+                <label>คำถาม:</label>
+                <input
+                    type="text"
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                />
+            </div>
+            {options.map((option, index) => (
+                <div key={index}>
+                    <label>ตัวเลือก {index + 1}:</label>
+                    <input
+                        type="text"
+                        value={option}
+                        onChange={(e) => handleOptionChange(index, e.target.value)}
+                    />
+                    <button onClick={() => handleRemoveOption(index)}>ลบ</button>
+                </div>
+            ))}
+            <div>
+                <label>ตัวเลือกที่ถูกต้อง:</label>
+                <select
+                    value={selectedCorrectOption}
+                    onChange={(e) => setSelectedCorrectOption(e.target.value)}
+                >
+                    <option value="">เลือกตัวเลือกที่ถูกต้อง</option>
+                    {options.map((option, index) => (
+                        <option key={index} value={option}>
+                            {option}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <button onClick={handleAddOption}>เพิ่มตัวเลือก</button>
+            <button onClick={handleQuestionSubmit}>บันทึกคำถาม</button>
+        </div>
+        )
     }
 
     const [course, setCourse] = useState<Course>();
@@ -82,6 +247,16 @@ function CreateLesson() {
             });
         }
     }
+    const [selectedOption, setSelectedOption] = useState('video');
+
+    const handleAddVideo = () => {
+        setSelectedOption('video');
+    }
+
+    const handleAddQuiz = () => {
+        setSelectedOption('quiz');
+    }
+
 
     useEffect(() => {
         getCourseByID();
@@ -118,21 +293,34 @@ function CreateLesson() {
                 <hr className="line-divider" />
                 <div className="lesson-line">
                     เนื้อหาการสอน
-                <button className='add-lesson-button'>
-                    <FontAwesomeIcon icon={faCirclePlus} size="2xl" style={{color: "#eb4600",}} />
-                </button>
+                    <div className='lesson-choice'>
+                        <div className='lesson-choice-line'>
+                            <input
+                                className="lesson-radio"
+                                type="radio"
+                                name="lessonType"
+                                value="video"
+                                checked={selectedOption === 'video'}
+                                onChange={handleAddVideo}
+                            />
+                            เพิ่มวิดีโอ (video)
+                        </div>
+                        <div className='lesson-choice-line'>
+                            <input
+                                className="lesson-radio"
+                                type="radio"
+                                name="lessonType"
+                                value="quiz"
+                                checked={selectedOption === 'quiz'}
+                                onChange={handleAddQuiz}
+                            />
+                            สร้างคำถาม (quiz)
+                        </div>
+                    </div>
                 </div>
-                <div className="lesson-line">
-                    หัวข้อ
-                    <input type="text" id='lesson-title' name='lesson-title' placeholder='กรอกชื่อเนื้อหาการสอน' value={lessonTitle} onChange={(event) => setLessonTitle(event.target.value)}/>
-                </div>
-                <div className="lesson-line">เนื้อหา<input type="text" id='content' name='content' placeholder='กรอกรายละเอียดเนื้อหา' value={content} onChange={(event) => setContent(event.target.value)}/></div>
-                <div className="lesson-line-upload">
-                    Video
-                    <input type="file" id='video' name='video' onChange={handleVideoChange} />
-                </div>
-                <div className="course-create-button">
-                    <button onClick={submit}>บันทึก <FontAwesomeIcon icon={faSave} /></button>
+                <div>
+                    {selectedOption === 'video' ? addVideoForm() : null}
+                    {selectedOption === 'quiz' ? createQuizForm() : null}
                 </div>
             </div>
         </div>
