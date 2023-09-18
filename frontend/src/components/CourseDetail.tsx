@@ -58,8 +58,7 @@ function CourseDetail() {
 
     const lessonElement = course?.lessons.map((lesson, index)=>{
         const isVideoLesson = lesson.videoURL;
-        const isQuizLesson = lesson.quiz;
-        console.log(course);
+        const isQuizLesson = lesson.quizzes.length > 0;
         return (
             <div className="course-detail-lesson">
             <p><b>{index + 1}</b></p>

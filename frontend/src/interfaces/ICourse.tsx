@@ -31,6 +31,7 @@ export interface User {
   }
 
   export interface Option {
+    _id: string;
     option: string;
     createdAt: Date;
     updatedAt: Date;
@@ -40,7 +41,7 @@ export interface User {
     _id: string;
     course: Course;
     title: string;
-    quiz: Quiz[];
+    quizzes: Quiz[];
     content: string;
     videoURL: string;
     createdAt: Date;

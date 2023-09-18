@@ -213,6 +213,17 @@ app.get('/quizzes/:quizId', authMiddleware, async (req, res) => {
     }
 });
 
+app.get('/quizzes-lesson/:lessonId', authMiddleware, async (req,res) => {
+    try {
+        const lessonId = req.params.lessonId;
+        const quizzes = await Quiz.find({ lesson: lessonId })
+        .populate('options', 'option');
+        res.status(200).json(quizzes);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot get quiz' });
+    }
+})
+
 // Check Quiz Answer
 app.post('/checkQuizAnswer', authMiddleware, async (req, res) => {
     try {
@@ -600,7 +611,7 @@ app.get('/courses/:id', async (req,res) => {
         const course = await Course.findById(req.params.id)
         .populate('instructor', 'username email')
         .populate('type', 'name')
-        .populate('lessons', 'title content videoURL quiz')
+        .populate('lessons', 'title content videoURL quizzes')
         .populate('enrolledStudents', '_id username email');
         if (!course) {
             return res.status(404).json({ error: 'Course not found' });

@@ -17,7 +17,7 @@ function CourseStudy() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [answers, setAnswers] = useState<Record<string, string | null>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [quizData, setQuizData] = useState<Quiz | undefined>();
+  const [quizData, setQuizData] = useState<Quiz[] | undefined>();
 
   const getCourseDetail = () => {
     const apiUrl = `http://localhost:8080/courses/${courseId}`;
@@ -38,7 +38,6 @@ function CourseStudy() {
           );
           setIsEnrolled(userEnrolled);
           if (res.lessons) {
-            console.log(res);
             setLessons(res.lessons);
           }
         } else {
@@ -48,8 +47,8 @@ function CourseStudy() {
   };
 
   const getQuizDetail = () => {
-    if (lessons[currentLesson]?.quiz) {
-      const quizApiUrl = `http://localhost:8080/quizzes/${lessons[currentLesson].quiz}`;
+    if (lessons[currentLesson]?.quizzes.length > 0) {
+      const quizApiUrl = `http://localhost:8080/quizzes-lesson/${lessons[currentLesson]._id}`;
       const quizOption = {
         method: 'GET',
         headers: {
@@ -138,25 +137,20 @@ function CourseStudy() {
         )}
       </div>
     );
-  };  
+  };
+  
 
   const handleSubmit = () => {
     
   };
 
-  const isQuizAvailable = lessons[currentLesson]?.quiz !== undefined;
-
-  const quizForm = () => {
+  const showQuiz = quizData?.map((quiz,no) => {
     return (
-      <div className="quiz-form-study">
-        <h2>แบบทดสอบ</h2>
-        <hr style={{ width: '100%', textAlign: 'center',marginBottom:'15px'}} />
-        <form onSubmit={handleSubmit}>
-          {isQuizAvailable && quizData ? (
-            <>
-              <p>{quizData.question}</p>
-              <ul>
-                {quizData.options.map((option: any, index: any) => (
+      <div>
+        <b>ข้อที่ { no + 1 }</b>
+        <p>{quiz.question}</p>
+        <ul>
+                {quiz.options.map((option: any, index: any) => (
                   <li key={index}>
                     <label>
                       <input
@@ -173,7 +167,21 @@ function CourseStudy() {
                     </label>
                   </li>
                 ))}
-              </ul>
+            </ul>
+      </div>
+    );
+  });
+
+  const isQuizAvailable = lessons[currentLesson]?.quizzes.length > 0;
+  const quizForm = () => {
+    return (
+      <div className="quiz-form-study">
+        <h2>แบบทดสอบ</h2>
+        <hr style={{ width: '100%', textAlign: 'center',marginBottom:'15px'}} />
+        <form onSubmit={handleSubmit}>
+          {isQuizAvailable && quizData ? (
+            <>
+              {showQuiz}
               <button type="submit" disabled={isSubmitted} className='quiz-form-study-button-send'>
                 ส่งคำตอบ
               </button>
@@ -196,7 +204,7 @@ function CourseStudy() {
   }, [course, isEnrolled, currentLesson]);
 
   useEffect(() => {
-    if (videoRef.current && lessons[currentLesson]?.videoUrl) {
+    if (videoRef.current && lessons[currentLesson]?.videoURL) {
       videoRef.current.src = require(`../files/${lessons[currentLesson].videoURL}`);
       videoRef.current.load();
       videoRef.current.play();
