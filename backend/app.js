@@ -94,6 +94,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "user"
     },
+    quizAnswers: [{
+        quizId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' },
+        answers:  { type: mongoose.Schema.Types.ObjectId, ref: 'Option' }
+    }],
     courseEnrolled: [{type: mongoose.Schema.Types.ObjectId, ref: 'Course'}],
     createdAt: {type:Date , default: Date.now},
     updatedAt: {type:Date , default:Date.now},
@@ -117,10 +121,10 @@ const lessonSchema = new mongoose.Schema({
     course: [{type: mongoose.Schema.Types.ObjectId, ref: 'Course'}],
     title: String,
     content: String,
-    quiz: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' },
+    quizzes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' }],
     videoURL: String,
-    createdAt: {type:Date , default: Date.now},
-    updatedAt: {type:Date , default:Date.now},
+    createdAt: {type: Date, default: Date.now},
+    updatedAt: {type: Date, default: Date.now},
 });
 const Lesson = mongoose.model('Lesson', lessonSchema);
 
@@ -128,6 +132,7 @@ const quizSchema = new mongoose.Schema({
     question: { type: String, required: true },
     options: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Option', required: true }],
     correctOption: { type: mongoose.Schema.Types.ObjectId, ref: 'Option', required: true },
+    lesson : { type: mongoose.Schema.Types.ObjectId, ref: 'Lesson', required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
@@ -179,15 +184,66 @@ app.post('/lessons/:lessonId/quizzes', authMiddleware, async (req, res) => {
             question,
             options,
             correctOption,
+            lesson: lessonId,
         });
-
         await newQuiz.save();
 
-        await Lesson.findByIdAndUpdate(lessonId, { $push: {quiz: newQuiz._id }});
-        
+        await Lesson.findByIdAndUpdate(lessonId, { $push: { quizzes: newQuiz._id }});
+
         res.status(201).json(newQuiz);
     } catch (error) {
         res.status(500).json({ error: 'Cannot create quiz in lesson' });
+    }
+});
+
+app.get('/quizzes/:quizId', authMiddleware, async (req, res) => {
+    try {
+        const quizId = req.params.quizId;
+
+        const quiz = await Quiz.findById(quizId)
+            .populate('options', 'option');
+
+        if (!quiz) {
+            return res.status(404).json({ error: 'Quiz not found' });
+        }
+
+        res.status(200).json(quiz);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot get quiz' });
+    }
+});
+
+// Check Quiz Answer
+app.post('/checkQuizAnswer', authMiddleware, async (req, res) => {
+    try {
+        const { lessonId, selectedOptionId } = req.body;
+        const userId = req.userData.userId;
+
+        // ค้นหา Quiz ใน Lesson
+        const quiz = await Quiz.findOne({ lesson: lessonId });
+        if (!quiz) {
+            return res.status(404).json({ error: 'Quiz not found' });
+        }
+
+        if (quiz.correctOption.toString() === selectedOptionId) {
+            const user = await User.findById(userId);
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            if (!user.quizAnswers) {
+                user.quizAnswers = [];
+            }
+
+            user.quizAnswers.push({ lesson: lessonId, option: selectedOptionId });
+            await user.save();
+
+            res.status(200).json({ message: 'Correct answer', isCorrect: true });
+        } else {
+            res.status(200).json({ message: 'Incorrect answer', isCorrect: false });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot check quiz answer' });
     }
 });
 
@@ -544,7 +600,7 @@ app.get('/courses/:id', async (req,res) => {
         const course = await Course.findById(req.params.id)
         .populate('instructor', 'username email')
         .populate('type', 'name')
-        .populate('lessons', 'title content videoURL')
+        .populate('lessons', 'title content videoURL quiz')
         .populate('enrolledStudents', '_id username email');
         if (!course) {
             return res.status(404).json({ error: 'Course not found' });

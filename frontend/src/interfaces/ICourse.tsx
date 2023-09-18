@@ -20,11 +20,27 @@ export interface User {
     createdAt: Date;
     updatedAt: Date;
   }
-  
+
+  export interface Quiz {
+    _id: string;
+    question: string;
+    options: Option[];
+    correctOption: Option;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  export interface Option {
+    option: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
   export interface Lesson {
     _id: string;
     course: Course;
     title: string;
+    quiz: Quiz[];
     content: string;
     videoURL: string;
     createdAt: Date;

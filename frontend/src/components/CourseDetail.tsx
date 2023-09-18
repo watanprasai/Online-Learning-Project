@@ -57,20 +57,26 @@ function CourseDetail() {
     };
 
     const lessonElement = course?.lessons.map((lesson, index)=>{
+        const isVideoLesson = lesson.videoURL;
+        const isQuizLesson = lesson.quiz;
+        console.log(course);
         return (
             <div className="course-detail-lesson">
-                <p><b>{index + 1}</b></p>
-                <p><b>ชื่อเนื้อหา: </b> {lesson.title}</p>
-                <p><b>เนื้อหาการสอน: </b> {lesson.content}</p>
-                {/* <video width="320" height="240" controls>
-                    <source
-                        src={require(`../files/${lesson.videoURL}`)}
-                        type="video/mp4"
-                    />
-                    Your browser does not support the video tag.
-                </video> */}
-            </div>
-        )
+            <p><b>{index + 1}</b></p>
+            {isVideoLesson && (
+                <>
+                    <p><b>ชื่อเนื้อหา: </b> {lesson.title}</p>
+                    <p><b>เนื้อหาการสอน: </b> {lesson.content}</p>
+                </>
+            )}
+            {isQuizLesson && (
+                <>
+                    <p><b>แบบทดสอบ</b></p>
+                    <p><b>เนื้อหา: </b> {lesson.title}</p>
+                </>
+            )}
+        </div>
+        );
     });
 
     const click_start = async () => {

@@ -14,3 +14,118 @@
     line-height: 20px;
     color: #fff;
 }
+
+.quiz-form-study {
+    margin-top: 50px;
+    background-color: #fff;
+    padding: 20px;
+    width: 40%;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+.quiz-form-study h2 {
+    font-size: 24px;
+    color: #333;
+}
+z
+.quiz-form-study p {
+    font-size: 16px;
+    color: #666;
+}
+
+.quiz-form-study ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.quiz-form-study li {
+    margin: 10px 0;
+}
+
+.quiz-form-study label {
+    display: block;
+    font-size: 16px;
+    color: #333;
+}
+
+.quiz-form-study input[type="radio"] {
+    margin-right: 10px;
+}
+
+.quiz-form-study-button-send {
+    background-color: #007bff; 
+    color: #fff; 
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+
+.lesson-control-button-study {
+    background-color: #007bff; 
+    color: #fff; 
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 0 10px;
+  }
+  
+.lesson-control-button-study:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.course-study-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding-bottom: 80px;
+    gap: 20px;
+}
+
+.lesson-content-study {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.lesson-content-study h1 {
+    font-size: 24px;
+    color: #333; 
+}
+
+.lesson-content-study p {
+    font-size: 16px;
+    color: #666;
+}
+
+.lesson-content-study video {
+    width: 60%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.quiz-form-study-button-send:hover {
+    background-color: #0056b3;
+}
+
+.quiz-form-study-button-send:active {
+    background-color: #003b80;
+}
+
+.lesson-control-button-study:hover {
+    background-color: #0056b3;
+}
+
+.lesson-control-button-study:active {
+    background-color: #003b80;
+}

@@ -209,3 +209,67 @@ select {
 .btn-submit-question {
     background-color: #dc3545;
 }
+
+.add-question-button-line {
+    margin-left: 40px;
+}
+.add-question-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.add-question-button:hover {
+    background-color: #0056b3;
+}
+
+.add-question-button:active {
+    background-color: #004080;
+}
+
+.custom-button-line-save {
+    margin-top: 20px;
+    margin-left: 40px;
+}
+
+.custom-button-save-option {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s; 
+}
+
+.custom-button-save-option:hover {
+    background-color: #1f8036;
+}
+
+.custom-button-save-option:active {
+    background-color: #13491f;
+}
+
+.lesson-line-quiz-title {
+    display: flex;
+    align-items: center;
+    padding-left: 40px;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    gap: 65px;
+    overflow: hidden;
+}
+
+.titleBox-quiz {
+    width: 500px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 16px;
+}
