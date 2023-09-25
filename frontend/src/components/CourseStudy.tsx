@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Course, Quiz } from '../interfaces/ICourse';
+import Swal from 'sweetalert2';
 import './css/coursestudy.css';
 
 function CourseStudy() {
@@ -139,50 +140,103 @@ function CourseStudy() {
     );
   };
   
+  const handleSubmit = (event: any) => {
+    event.preventDefault();
 
-  const handleSubmit = () => {
-    
+    console.log(selectedAnswers);
+  
+    if (Object.keys(selectedAnswers).length !== quizData?.length) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'คุณตอบคำถามไม่ครบ',
+        text: 'โปรดตอบคำถามทุกข้อก่อนที่คุณจะส่งคำตอบ',
+      });
+      return;
+    }
+
+    const submitPromises = Object.keys(selectedAnswers).map((quizId) => {
+      const apiUrl = `http://localhost:8080/checkQuizAnswer`;
+      const option = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `${token}`,
+        },
+        body: JSON.stringify({
+          quizId,
+          selectedOptionId: selectedAnswers[quizId],
+        }),
+      };
+  
+      return fetch(apiUrl, option)
+        .then((res) => res.json())
+        .then((res) => ({
+          isCorrect: res.isCorrect,
+          quizId,
+        }));
+    });
+  
+    Promise.all(submitPromises)
+      .then((results) => {
+        results.forEach((result) => {
+          if (result.isCorrect) {
+            console.log(`ข้อที่ ${result.quizId} คำตอบถูกต้อง`);
+          } else {
+            console.log(`ข้อที่ ${result.quizId} คำตอบไม่ถูกต้อง`);
+          }
+        });
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        console.error('เกิดข้อผิดพลาดในการส่งคำตอบ', error);
+        setIsSubmitting(false);
+      });
   };
+  
+  
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string | null>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const showQuiz = quizData?.map((quiz,no) => {
+  const showQuiz = quizData?.map((quiz, no) => {
     return (
-      <div>
-        <b>ข้อที่ { no + 1 }</b>
+      <div key={quiz._id}>
+        <b>ข้อที่ {no + 1}</b>
         <p>{quiz.question}</p>
         <ul>
-                {quiz.options.map((option: any, index: any) => (
-                  <li key={index}>
-                    <label>
-                      <input
-                        type="radio"
-                        name="answer"
-                        value={option._id}
-                        onChange={(event) => {
-                          const selectedAnswer = event.target.value;
-                          setAnswers({ answer: selectedAnswer });
-                        }}
-                        disabled={isSubmitted}
-                      />
-                      {option.option}
-                    </label>
-                  </li>
-                ))}
-            </ul>
+          {quiz.options.map((option: any) => (
+            <li key={option._id}>
+              <label>
+                <input
+                  type="radio"
+                  name={`answer_${quiz._id}`}
+                  value={option._id}
+                  onChange={(event) => {
+                    const selectedAnswer = event.target.value;
+                    setSelectedAnswers({ ...selectedAnswers, [quiz._id]: selectedAnswer });
+                  }}
+                  disabled={isSubmitted || isSubmitting}
+                />
+                {option.option}
+              </label>
+            </li>
+          ))}
+        </ul>
       </div>
     );
   });
+  
 
   const isQuizAvailable = lessons[currentLesson]?.quizzes.length > 0;
   const quizForm = () => {
     return (
       <div className="quiz-form-study">
         <h2>แบบทดสอบ</h2>
-        <hr style={{ width: '100%', textAlign: 'center',marginBottom:'15px'}} />
+        <hr style={{ width: '100%', textAlign: 'center', marginBottom: '15px' }} />
         <form onSubmit={handleSubmit}>
           {isQuizAvailable && quizData ? (
             <>
               {showQuiz}
-              <button type="submit" disabled={isSubmitted} className='quiz-form-study-button-send'>
+              <button type="submit" disabled={isSubmitted || isSubmitting} className='quiz-form-study-button-send'>
                 ส่งคำตอบ
               </button>
             </>

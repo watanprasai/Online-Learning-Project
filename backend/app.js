@@ -227,11 +227,10 @@ app.get('/quizzes-lesson/:lessonId', authMiddleware, async (req,res) => {
 // Check Quiz Answer
 app.post('/checkQuizAnswer', authMiddleware, async (req, res) => {
     try {
-        const { lessonId, selectedOptionId } = req.body;
+        const { quizId, selectedOptionId } = req.body;
         const userId = req.userData.userId;
 
-        // ค้นหา Quiz ใน Lesson
-        const quiz = await Quiz.findOne({ lesson: lessonId });
+        const quiz = await Quiz.findById(quizId);
         if (!quiz) {
             return res.status(404).json({ error: 'Quiz not found' });
         }
@@ -246,7 +245,7 @@ app.post('/checkQuizAnswer', authMiddleware, async (req, res) => {
                 user.quizAnswers = [];
             }
 
-            user.quizAnswers.push({ lesson: lessonId, option: selectedOptionId });
+            user.quizAnswers.push({ quiz: quizId, option: selectedOptionId });
             await user.save();
 
             res.status(200).json({ message: 'Correct answer', isCorrect: true });
@@ -257,6 +256,7 @@ app.post('/checkQuizAnswer', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Cannot check quiz answer' });
     }
 });
+
 
 
 // Option
