@@ -391,6 +391,9 @@ function SignIn() {
                 <div className="forget-password">
                     <button className="forget-password--button" onClick={() => setPopupState(true)}>Forget password?</button>
                 </div>
+                <div className="guset-button">
+                    <button className="continue-with-guest-button" onClick={() => navigate('/Course')}>Continue with guest</button>
+                </div>
             </div>
         </div>
     );

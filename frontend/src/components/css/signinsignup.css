@@ -262,4 +262,23 @@
     background-color: rgb(26, 163, 26);
 }
 
+.continue-with-guest-button {
+    border: 0;
+    font-size: 17px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgb(122, 122, 122);
+    font-weight: bold;
+    background-color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.continue-with-guest-button:hover {
+    color: rgb(172, 169, 169);
+}
+
+.continue-with-guest-button:active {
+    color: rgb(143, 140, 140);
+}
+
 
