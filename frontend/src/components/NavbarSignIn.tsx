@@ -61,14 +61,14 @@ function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
             </Link>
           </IconButton>
           <IconButton>
-            <Link to={`/myCourses/${_id}`}>
+            <Link to={`/myCourses/${_id}`} style={{ textDecoration: 'none' }}>
               <Typography className="navbar-signin-a" variant="body1" style={{ color: '#FF5733', textDecoration: 'none' }}>
                 คอร์สเรียนของฉัน
               </Typography>
             </Link>
           </IconButton>
           <IconButton>
-            <Link to={`/Course`}>
+            <Link to={`/Course`} style={{ textDecoration: 'none' }}>
               <Typography className="navbar-signin-a" variant="body1" style={{ color: '#FF5733', textDecoration: 'none' }}>
                 หน้าแรก
               </Typography>

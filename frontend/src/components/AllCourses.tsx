@@ -3,8 +3,8 @@ import './css/course.css';
 import { Course, Lesson, User, Type } from '../interfaces/ICourse';
 import { Link } from 'react-router-dom';
 
-function MainCourse() {
- 
+function AllCourses() {
+
     const [users, setUser] = useState<User[]>([]);
     const getUser = async() => {
         const apiUrl = "http://localhost:8080/users";
@@ -51,18 +51,6 @@ function MainCourse() {
         return titleMatch && typeMatch;
     })
 
-    const courseElement = filteredCourse.slice(0, 6).map((course) => {
-        return (
-            <div className='course-item' key={course._id}>
-                <img src={require(`../files/${course.url}`)} alt={course.title} />
-                <h4>{course.title}</h4>
-                <Link to={`/courseDetail/${course._id}`}>
-                    <button>ดูรายละเอียด</button>
-                </Link>
-            </div>
-        );
-    });
-
     const [types, setType] = useState<Type[]>([]);
     const getType = async() => {
         const apiUrl = "http://localhost:8080/types";
@@ -100,15 +88,38 @@ function MainCourse() {
             }
         });
     };
-    
 
+     const [currentPage, setCurrentPage] = useState<number>(1);
+     const itemsPerPage: number = 9;
+ 
+     const indexOfLastCourse: number = currentPage * itemsPerPage;
+     const indexOfFirstCourse: number = indexOfLastCourse - itemsPerPage;
+     const currentCourses: Course[] = courses.slice(indexOfFirstCourse, indexOfLastCourse);
+ 
+     const pageNumbers: number[] = [];
+     for (let i = 1; i <= Math.ceil(courses.length / itemsPerPage); i++) {
+         pageNumbers.push(i);
+     }
+ 
+     const renderPageNumbers: React.ReactNode[] = pageNumbers.map((number) => (
+        <li key={number} className={number === currentPage ? 'current' : ''}>
+          <Link
+            to={`/allCourse/${number}`}
+            onClick={() => setCurrentPage(number)}
+            style={{ textDecoration: 'none', color: 'black' }}
+          >
+            {number}
+          </Link>
+        </li>
+      ));
+    
     useEffect(() => {
         getUser();
         getCourse();
         getType();
         getLesson();
     }, []);
-
+    
     return (
         <div className='page1'>
             <div className='header'>
@@ -125,16 +136,25 @@ function MainCourse() {
                 </select>
                 <input type="text" id='type' name='type' placeholder='ค้นหา Course' value={searchCourse} onChange={(event) => setSearchCourse(event.target.value)} />
             </div>
-            <div className='course-grid'>
-                {courseElement}
+            <ul className='page-numbers-top'>
+                {renderPageNumbers}
+            </ul>
+            <div className='course-grid-allcourse'>
+                {currentCourses.map((course) => (
+                    <div className='course-item-allcourse' key={course._id}>
+                        <img src={require(`../files/${course.url}`)} alt={course.title} />
+                        <h4>{course.title}</h4>
+                        <Link to={`/courseDetail/${course._id}`}>
+                            <button>ดูรายละเอียด</button>
+                        </Link>
+                    </div>
+                ))}
             </div>
-            <div className='more-button'>
-                <Link to='/allCourse/1'>
-                    <button>ดูทั้งหมด</button>
-                </Link>
-            </div>
+            <ul className='page-numbers-bottom'>
+                {renderPageNumbers}
+            </ul>
         </div>
-    )
-}
+    );
+};
 
-export default MainCourse;
+export default AllCourses;
