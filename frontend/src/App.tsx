@@ -20,7 +20,7 @@ function App() {
   return (
     <Router>
    <div>
-   {isLoggedIn ? <NavbarSignIn /> : <NavbarNotSignIn />}
+   {isLoggedIn ? <NavbarSignIn setIsLoggedIn={setIsLoggedIn} /> : <NavbarNotSignIn />}
    <Routes>
        <Route path='/' element={<SignIn/>}></Route>
        <Route path='/register' element={<SignUp/>}></Route>

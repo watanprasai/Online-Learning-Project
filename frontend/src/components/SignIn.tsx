@@ -209,8 +209,10 @@ function SignIn() {
                 });
                 const token = data.token;
                 const _id = data.userID;
+                const role = data.userRole;
                 localStorage.setItem('token', token);
                 localStorage.setItem('_id', _id);
+                localStorage.setItem('role', role);
                 navigate('/Course'); 
                 window.location.reload();
             } else {

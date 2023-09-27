@@ -518,10 +518,10 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
 
-        const token = jwt.sign({ userId: user._id , username: user.username}, 'j3eCq!2N#5ZdS9X*rF$GvHmTbQwKzE7a', { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user._id , username: user.username , role: user.role}, 'j3eCq!2N#5ZdS9X*rF$GvHmTbQwKzE7a', { expiresIn: '1h' });
         const userID = user._id;
-
-        res.json({ token , userID});
+        const userRole = user.role;
+        res.json({ token , userID , userRole});
     } catch (error) {
         res.status(500).json({ error: 'Cannot log in' });
     }
