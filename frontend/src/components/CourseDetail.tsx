@@ -83,31 +83,46 @@ function CourseDetail() {
     };
 
     const enroll_course = async () => {
-        const apiUrl = `http://localhost:8080/courses/${courseId}/enroll`;
-        const option = {
-            method : "POST",
-            headers : {
-                "Content-Type" : "application/json",
-                Authorization: token,
-            },
-        };
-        const res = await fetch(apiUrl,option);
-        const data = await res.json();
-        if (res.ok) {
+        if (!user_id) {
             await Swal.fire({
-                title: 'ลงทำเบียนเรียนสำเร็จ',
-                text: 'คุณได้ลงทะเบียนเรียนคอร์สนี้แล้ว',
-                icon: 'success',
-                confirmButtonText: 'รับทราบ'
-            })
-            window.location.reload();
-        }else {
-            await Swal.fire({
-                title: 'ลงทะเบียนเรียนไม่สำเร็จ',
-                text: data.error,
-                icon: 'error',
-                confirmButtonText: 'รับทราบ'
+                title: 'คุณยังไม่ได้เข้าสู่ระบบ',
+                text: 'คุณต้องเข้าสู่ระบบก่อนที่จะลงทะเบียนเรียน',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'เข้าสู่ระบบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigate('/');
+                }
             });
+        } else {
+            const apiUrl = `http://localhost:8080/courses/${courseId}/enroll`;
+            const option = {
+                method : "POST",
+                headers : {
+                    "Content-Type" : "application/json",
+                    Authorization: token,
+                },
+            };
+            const res = await fetch(apiUrl,option);
+            const data = await res.json();
+            if (res.ok) {
+                await Swal.fire({
+                    title: 'ลงทำเบียนเรียนสำเร็จ',
+                    text: 'คุณได้ลงทะเบียนเรียนคอร์สนี้แล้ว',
+                    icon: 'success',
+                    confirmButtonText: 'รับทราบ'
+                })
+                window.location.reload();
+            }else {
+                await Swal.fire({
+                    title: 'ลงทะเบียนเรียนไม่สำเร็จ',
+                    text: data.error,
+                    icon: 'error',
+                    confirmButtonText: 'รับทราบ'
+                });
+            }
         }
     }
 
