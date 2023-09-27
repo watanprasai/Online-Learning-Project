@@ -16,7 +16,6 @@ function CourseStudy() {
   const [currentTime, setCurrentTime] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [answers, setAnswers] = useState<Record<string, string | null>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [quizData, setQuizData] = useState<Quiz[] | undefined>();
 
@@ -142,9 +141,7 @@ function CourseStudy() {
   
   const handleSubmit = (event: any) => {
     event.preventDefault();
-
     console.log(selectedAnswers);
-  
     if (Object.keys(selectedAnswers).length !== quizData?.length) {
       Swal.fire({
         icon: 'warning',
@@ -153,7 +150,7 @@ function CourseStudy() {
       });
       return;
     }
-
+  
     const submitPromises = Object.keys(selectedAnswers).map((quizId) => {
       const apiUrl = `http://localhost:8080/checkQuizAnswer`;
       const option = {
@@ -185,6 +182,32 @@ function CourseStudy() {
             console.log(`ข้อที่ ${result.quizId} คำตอบไม่ถูกต้อง`);
           }
         });
+  
+        const correctAnswers = results.filter((result) => result.isCorrect).length;
+        const totalQuestions = results.length;
+      
+        Swal.fire({
+          icon: 'success',
+          title: 'คะแนนของคุณ',
+          text: `คุณได้ ${correctAnswers} / ${totalQuestions} คะแนน`,
+          showCancelButton: true,
+          cancelButtonText: 'ทำแบบทดสอบใหม่',
+          confirmButtonText: 'ไปบทเรียนถัดไป',
+          reverseButtons: true,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            goToNextLesson();
+          } else if (result.isDismissed) {
+            setIsSubmitted(false);
+            setSelectedAnswers({});
+
+            const radioInputs = document.querySelectorAll<HTMLInputElement>('input[type="radio"]');
+            radioInputs.forEach((input) => {
+              input.checked = false;
+            });
+          }
+        });
+      
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -192,7 +215,6 @@ function CourseStudy() {
         setIsSubmitting(false);
       });
   };
-  
   
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string | null>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -225,8 +247,8 @@ function CourseStudy() {
     );
   });
   
-
   const isQuizAvailable = lessons[currentLesson]?.quizzes.length > 0;
+  const isQuizForm = isQuizAvailable && quizData;
   const quizForm = () => {
     return (
       <div className="quiz-form-study">
@@ -248,6 +270,24 @@ function CourseStudy() {
     );
   };
   
+  const lessonProgress = () => {
+    const nextLesson = currentLesson < lessons.length - 1 ? lessons[currentLesson + 1] : null;
+  
+    return (
+      <div className="lesson-progress">
+        <p>
+          บทเรียนที่ {currentLesson + 1} จาก {lessons.length}
+        </p>
+        {nextLesson && (
+          <div className="next-lesson-info">
+            <h3>บทเรียนถัดไป:</h3>
+            <p>Title:{nextLesson.title}</p>
+            <p>({nextLesson.quizzes.length > 0 ? 'Quiz' : 'Video'})</p>
+          </div>
+        )}
+      </div> 
+    );
+  };
 
   useEffect(() => {
     getCourseDetail();
@@ -271,25 +311,41 @@ function CourseStudy() {
 
   return (
     <div className="course-study-container">
-        {isQuizAvailable ? quizForm() : videoForm()}
-        <div className="lesson-controls">
-            <button
-            onClick={goToPreviousLesson}
-            disabled={currentLesson === 0}
-            className="lesson-control-button-study"
-            >
-            บทเรียนก่อนหน้า
-            </button>
-            <button
+      {lessonProgress()}
+      {isQuizAvailable ? quizForm() : videoForm()}
+      <div className="lesson-controls">
+        <button
+          onClick={goToPreviousLesson}
+          disabled={currentLesson === 0}
+          className="lesson-control-button-study"
+        >
+          บทเรียนก่อนหน้า
+        </button>
+        {!isQuizForm ? (
+          <button
             onClick={goToNextLesson}
             disabled={currentLesson === lessons.length - 1}
             className="lesson-control-button-study"
-            >
+          >
             บทเรียนถัดไป
-            </button>
-        </div>
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              Swal.fire({
+                icon: 'warning',
+                title: 'คุณต้องทำแบบทดสอบก่อน',
+                text: 'โปรดทำแบบทดสอบก่อนที่คุณจะไปยังบทเรียนถัดไป',
+              });
+            }}
+            disabled={currentLesson === lessons.length - 1}
+            className="lesson-control-button-study"
+          >
+            บทเรียนถัดไป
+          </button>
+        )}
+      </div>
     </div>
-
   );
 }
 

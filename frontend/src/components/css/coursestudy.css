@@ -129,3 +129,25 @@ z
 .lesson-control-button-study:active {
     background-color: #003b80;
 }
+
+.lesson-progress {
+    position: absolute;
+    top: 10%;
+    right: 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+.next-lesson-info {
+    margin-top: 10px;
+    text-align: center;
+    align-items: center;
+}
+  
+  
