@@ -131,11 +131,11 @@ function EditProfile() {
                     {isEditMode ? (
                         <div>
                             <div className="profile-button-line">
-                                <button type="button" className="change-password-button">แก้ไขรหัสผ่าน</button>
+                                <button type="button" className="change-password-button" onClick={() => {navigate(`/editProfile/${userId}/changePassword`)}}>แก้ไขรหัสผ่าน</button>
                             </div>
                             <div className="profile-button-back-save-line">
-                                <button type="button" onClick={handleCloseEditMode}>ย้อนกลับ</button>
-                                <button type="button" onClick={saveProfile}>บันทึก</button>
+                                <button type="button" onClick={handleCloseEditMode} className="profile-button-back-button">ย้อนกลับ</button>
+                                <button type="button" onClick={saveProfile} className="profile-button-save-button">บันทึก</button>
                             </div>
                         </div>  
                     ) : (

@@ -140,3 +140,38 @@
 .send-button-change-password-page:hover {
     background-color: #0056b3;
 }
+
+.profile-button-back-save-line {
+    margin-top: 20px;
+}
+
+.profile-button-back-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    margin-right: 10px; /* เพิ่มระยะห่างข้างขวา */
+}
+
+.profile-button-back-button:hover {
+    background-color: #565e64;
+}
+
+.profile-button-save-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.profile-button-save-button:hover {
+    background-color: #1f8a3c;
+}
