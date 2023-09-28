@@ -11,6 +11,8 @@ import NavbarNotSignIn from './components/NavbarNotSignIn';
 import CourseDetail from './components/CourseDetail';
 import CourseStudy from './components/CourseStudy';
 import AllCourses from './components/AllCourses';
+import EditProfile from './components/EditProfile';
+import ChangePassword from './components/ChangePassword';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -31,6 +33,8 @@ function App() {
           <Route path='/createLesson' element={<CreateLesson/>}/>
           <Route path='/courseDetail/:courseId' element={<CourseDetail/>}></Route>
           <Route path='/courseStudy/:courseId' element={<CourseStudy/>}></Route>
+          <Route path='/editProfile/:userId' element={<EditProfile/>}></Route>
+          <Route path='/editProfile/:userId/changePassword' element={<ChangePassword/>}></Route>
           <Route path="/allCourse/:page" element={<AllCourses />}/>
         </Routes>
       </div>

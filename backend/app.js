@@ -421,6 +421,47 @@ app.post('/resetPassword',async(req,res) => {
     }
 })
 
+// Change Password
+app.post('/changePassword', async (req, res) => {
+    try {
+      const { currentPassword, newPassword, confirmPassword, email } = req.body;
+  
+      if (!currentPassword || !newPassword || !confirmPassword || !email) {
+        return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ถูกต้อง' });
+      }
+  
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ error: 'ผู้ใช้ไม่พบ' });
+      }
+  
+      const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: 'รหัสผ่านปัจจุบันไม่ถูกต้อง' });
+      }
+  
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ error: 'รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน' });
+      }
+  
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+  
+      const updatedUser = await User.findOneAndUpdate(
+        { email },
+        { password: hashedPassword },
+        { new: true }
+      );
+  
+      if (!updatedUser) {
+        return res.status(500).json({ error: 'ไม่สามารถเปลี่ยนรหัสผ่านได้' });
+      }
+  
+      res.status(200).json({ message: 'เปลี่ยนรหัสผ่านสำเร็จ' });
+    } catch (error) {
+      console.error('เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน:', error);
+      res.status(500).json({ error: 'ไม่สามารถเปลี่ยนรหัสผ่านได้' });
+    }
+  });
 
 // User CRUD
 

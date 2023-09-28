@@ -82,7 +82,7 @@ function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
-            <MenuItem onClick={clickEditProfile}>แก้ไขข้อมูล</MenuItem>
+            <MenuItem onClick={clickEditProfile}>ข้อมูลส่วนตัว</MenuItem>
             <MenuItem onClick={clickMyCourses}>คอร์สเรียนของฉัน</MenuItem>
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </Menu>
