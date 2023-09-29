@@ -94,10 +94,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "user"
     },
-    quizAnswers: [{
-        quizId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' },
-        answers:  { type: mongoose.Schema.Types.ObjectId, ref: 'Option' }
-    }],
     courseEnrolled: [{type: mongoose.Schema.Types.ObjectId, ref: 'Course'}],
     createdAt: {type:Date , default: Date.now},
     updatedAt: {type:Date , default:Date.now},
@@ -168,11 +164,31 @@ const otpSchema = new mongoose.Schema({
     expiredAt: {
         type: Date,
         default: function () {
-            return new Date(+this.createdAt + 5 * 60 * 1000); // หมดอายุใน 5 นาที
+            return new Date(+this.createdAt + 5 * 60 * 1000);
         },
     },
 });
 const Otp = mongoose.model('Otp', otpSchema);
+
+const progressSchema = new mongoose.Schema({
+    user : { type:mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
+    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
+    lesson: { type: mongoose.Schema.Types.ObjectId, ref: 'Lesson', required: true },
+    videoProgress : Number,
+    quizAnswer: [{ type:mongoose.Schema.Types.ObjectId, ref: 'QuizAnswer'}],
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+});
+const Progress = mongoose.model('Progress', progressSchema);
+
+const quizAnswerSchema = new mongoose.Schema({
+    quiz: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz', required: true },
+    answer: { type: mongoose.Schema.Types.ObjectId, ref: 'Option', required: true },
+    isCorrect: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+});
+const QuizAnswer = mongoose.model('QuizAnswer', quizAnswerSchema);
 
 // Quiz
 app.post('/lessons/:lessonId/quizzes', authMiddleware, async (req, res) => {
@@ -241,23 +257,58 @@ app.post('/checkQuizAnswer', authMiddleware, async (req, res) => {
                 return res.status(404).json({ error: 'User not found' });
             }
 
-            if (!user.quizAnswers) {
-                user.quizAnswers = [];
-            }
+            const quizAnswer = new QuizAnswer({
+                quiz: quizId,
+                answer: selectedOptionId,
+                isCorrect: true,
+            });
+            await quizAnswer.save();
 
-            user.quizAnswers.push({ quiz: quizId, option: selectedOptionId });
-            await user.save();
-
-            res.status(200).json({ message: 'Correct answer', isCorrect: true });
+            res.status(200).json({ message: 'Correct answer', isCorrect: true , quiz_id: quizAnswer._id});
         } else {
-            res.status(200).json({ message: 'Incorrect answer', isCorrect: false });
+            const quizAnswer = new QuizAnswer({
+                quiz: quizId,
+                answer: selectedOptionId,
+                isCorrect: false,
+            });
+            await quizAnswer.save();
+            res.status(200).json({ message: 'Incorrect answer', isCorrect: false , quiz_id: quizAnswer._id});
         }
     } catch (error) {
         res.status(500).json({ error: 'Cannot check quiz answer' });
     }
 });
 
+app.post('/updateQuizProgress', authMiddleware, async (req,res) => {
+    try {
+        const userId = req.userData.userId;
+        const { courseId , lessonId , quizId } = req.body;
+        const progress = new Progress({
+            user: userId,
+            course: courseId,
+            lesson: lessonId,
+            quizAnswer: quizId,
+        });
+        await progress.save();
+        res.status(200).json({status:"ok"});
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot update progress' });
+    }
+});
 
+app.get('/getProgress',async (req,res) => {
+
+        const progresses = await Progress.find()
+        .populate({path: 'quizAnswer', populate: {
+            path: 'answer'
+        }});
+
+        if (!progresses) {
+            return res.status(404).json({ error: 'progresses not found for this quiz' });
+        }
+
+        res.json(progresses);
+})
 
 // Option
 app.post('/options', authMiddleware, async (req, res) => {

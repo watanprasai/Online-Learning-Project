@@ -170,6 +170,7 @@ function CourseStudy() {
         .then((res) => ({
           isCorrect: res.isCorrect,
           quizId,
+          quizAnswerId: res.quiz_id,
         }));
     });
   
@@ -182,10 +183,10 @@ function CourseStudy() {
             console.log(`ข้อที่ ${result.quizId} คำตอบไม่ถูกต้อง`);
           }
         });
-  
+
+        const quizAnswerId = results.map((result) => result.quizAnswerId);
         const correctAnswers = results.filter((result) => result.isCorrect).length;
         const totalQuestions = results.length;
-      
         Swal.fire({
           icon: 'success',
           title: 'คะแนนของคุณ',
@@ -196,6 +197,24 @@ function CourseStudy() {
           reverseButtons: true,
         }).then((result) => {
           if (result.isConfirmed) {
+            const apiUrlProgress = 'http://localhost:8080/updateQuizProgress';
+            const optionProgress = {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `${token}`,
+              },
+              body: JSON.stringify({
+                courseId: courseId,
+                lessonId: lessons[currentLesson]._id,
+                quizId: quizAnswerId,
+              }),
+            }
+            fetch(apiUrlProgress,optionProgress)
+            .then((res) => res.json())
+            .then((res) => {
+              console.log(res);
+            })
             goToNextLesson();
           } else if (result.isDismissed) {
             setIsSubmitted(false);
