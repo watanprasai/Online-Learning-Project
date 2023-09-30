@@ -94,6 +94,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "user"
     },
+    progress: [{type: mongoose.Schema.Types.ObjectId, ref: 'Progress'}],
     courseEnrolled: [{type: mongoose.Schema.Types.ObjectId, ref: 'Course'}],
     createdAt: {type:Date , default: Date.now},
     updatedAt: {type:Date , default:Date.now},
@@ -279,6 +280,7 @@ app.post('/checkQuizAnswer', authMiddleware, async (req, res) => {
     }
 });
 
+// Update Quiz Progress
 app.post('/updateQuizProgress', authMiddleware, async (req,res) => {
     try {
         const userId = req.userData.userId;
@@ -290,9 +292,58 @@ app.post('/updateQuizProgress', authMiddleware, async (req,res) => {
             quizAnswer: quizId,
         });
         await progress.save();
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        user.progress.push(progress);
+        await user.save();
+
         res.status(200).json({status:"ok"});
     } catch (error) {
         res.status(500).json({ error: 'Cannot update progress' });
+    }
+});
+
+// Get Progress by lessonId
+app.get('/getProgress/:lessonId', async (req,res) => {
+    const lessonId = req.params.lessonId;
+    const progress = await Progress.find({lesson: lessonId});
+    if (!progress || progress.length === 0) {
+        return res.status(404).json({ error: 'progress not found' });
+    }
+    res.json(progress);
+})
+
+// Update Video Progress or Create if not exists
+app.post('/updateOrCreateVideoProgress', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.userData.userId;
+        const { courseId, lessonId, videoProgress } = req.body;
+
+        const existingProgress = await Progress.findOne({
+            user: userId,
+            course: courseId,
+            lesson: lessonId,
+        });
+
+        if (existingProgress) {
+            existingProgress.videoProgress = videoProgress;
+            await existingProgress.save();
+            res.status(200).json({ message: 'อัปเดตความคืบหน้าของวิดีโอสำเร็จ' });
+        } else {
+            const progress = new Progress({
+                user: userId,
+                course: courseId,
+                lesson: lessonId,
+                videoProgress: videoProgress
+            });
+            await progress.save();
+            res.status(201).json({ message: 'สร้างความคืบหน้าของวิดีโอสำเร็จ' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'ไม่สามารถอัปเดตหรือสร้างความคืบหน้าของวิดีโอ' });
     }
 });
 

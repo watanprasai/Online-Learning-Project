@@ -19,6 +19,52 @@ function CourseStudy() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [quizData, setQuizData] = useState<Quiz[] | undefined>();
 
+  const [timer, setTimer] = useState(0);
+  const [intervalId, setIntervalId] = useState<null | NodeJS.Timer>(null);
+
+  const startVideoTimer = () => {
+    if (!intervalId) {
+      const newIntervalId = setInterval(() => {
+        setTimer(prevTimer => prevTimer + 1);
+      }, 1000);
+      setIntervalId(newIntervalId);
+    }
+  };
+  
+  const stopVideoTimer = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+  
+      const currentPercentageWatched = (timer / videoDuration) * 100;
+      console.log("Timer: ",timer);
+      console.log("percentage: ", currentPercentageWatched);
+      // ทำการอัพเดตความคืบหน้าในฐานข้อมูล
+      const apiUrlProgress = 'http://localhost:8080/updateOrCreateVideoProgress';
+      const optionProgress = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `${token}`,
+        },
+        body: JSON.stringify({
+          courseId: courseId,
+          lessonId: lessons[currentLesson]._id,
+          videoProgress: currentPercentageWatched,
+        }),
+      };
+      fetch(apiUrlProgress, optionProgress)
+        .then((res) => res.json())
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((error) => {
+          console.error('เกิดข้อผิดพลาดในการอัพเดตความคืบหน้าวิดีโอ', error);
+        });
+    }
+  };
+  
+  
   const getCourseDetail = () => {
     const apiUrl = `http://localhost:8080/courses/${courseId}`;
     const option = {
@@ -71,20 +117,6 @@ function CourseStudy() {
     }
   };
 
-  const handleVideoTimeUpdate = (event: any) => {
-    setCurrentTime(event.target.currentTime);
-    const totalLessonTime = lessons.reduce((total, lesson) => total + lesson.duration, 0);
-    const currentTimeInCourse =
-      lessons.slice(0, currentLesson).reduce((total, lesson) => total + lesson.duration, 0) +
-      event.target.currentTime;
-    const newProgress = (currentTimeInCourse / totalLessonTime) * 100;
-    setProgress(newProgress);
-  };
-
-  const handleVideoLoadedData = (event: any) => {
-    setVideoDuration(event.target.duration);
-  };
-
   const loadLessonData = () => {
     if (course && isEnrolled) {
       if (lessons.length > 0) {
@@ -106,11 +138,6 @@ function CourseStudy() {
     }
   };
 
-  const handleVideoEnded = () => {
-    const newProgress = ((currentLesson + 1) / lessons.length) * 100;
-    setProgress(newProgress);
-  };
-
   const videoForm = () => {
     return (
       <div className="lesson-content-study">
@@ -123,9 +150,10 @@ function CourseStudy() {
               width="320"
               height="240"
               controls
-              onEnded={handleVideoEnded}
               onTimeUpdate={handleVideoTimeUpdate}
               onLoadedData={handleVideoLoadedData}
+              onPlay={startVideoTimer}
+              onPause={stopVideoTimer} 
             >
               <source
                 src={require(`../files/${lessons[currentLesson].videoURL}`)}
@@ -137,6 +165,23 @@ function CourseStudy() {
         )}
       </div>
     );
+  };
+  
+  const handleVideoTimeUpdate = (event: any) => {
+    const currentTimeInVideo = event.target.currentTime;
+    const videoDuration = event.target.duration;
+    const percentageWatched = (currentTimeInVideo / videoDuration) * 100;
+  
+    if (percentageWatched < progress) {
+      setProgress(progress);
+    } else {
+      setProgress(percentageWatched);
+    }
+  };
+  
+  const handleVideoLoadedData = (event: any) => {
+    const videoDuration = event.target.duration;
+    setVideoDuration(videoDuration);
   };
   
   const handleSubmit = (event: any) => {
