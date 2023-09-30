@@ -13,6 +13,7 @@ import CourseStudy from './components/CourseStudy';
 import AllCourses from './components/AllCourses';
 import EditProfile from './components/EditProfile';
 import ChangePassword from './components/ChangePassword';
+import RegisteredCourses from './components/RegisteredCourses';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -35,6 +36,7 @@ function App() {
           <Route path='/courseStudy/:courseId' element={<CourseStudy/>}></Route>
           <Route path='/editProfile/:userId' element={<EditProfile/>}></Route>
           <Route path='/editProfile/:userId/changePassword' element={<ChangePassword/>}></Route>
+          <Route path='/myCourses/:userId' element={<RegisteredCourses/>}></Route>
           <Route path="/allCourse/:page" element={<AllCourses />}/>
         </Routes>
       </div>

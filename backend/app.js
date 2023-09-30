@@ -534,6 +534,25 @@ app.get('/users/:id', async (req,res) => {
     }
 });
 
+app.get('/getuser', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.userData.userId;
+        const user = await User.findById(userId)
+            .populate('courseEnrolled', 'title description instructor lessons type')
+            .populate({
+                path: 'courseEnrolled',
+                populate: {
+                    path: 'instructor',
+                    select: 'username email'
+                }
+            });
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot retrieve user' });
+    }
+});
+
+
 app.put('/users/:id', async (req,res) => {
     try {
         const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true});
