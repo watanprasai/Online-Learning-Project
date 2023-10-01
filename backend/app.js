@@ -667,7 +667,8 @@ app.post('/register', async (req, res) => {
 
 // Test Check Token
 app.get('/secure-route', authMiddleware, (req, res) => {
-    res.json({ message: 'This is a secure route' });
+    const role = req.userData.role;
+    res.json({ message: 'This is a secure route' , role: role});
 });
 
 // Login
@@ -685,7 +686,7 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
 
-        const token = jwt.sign({ userId: user._id , username: user.username , role: user.role}, 'j3eCq!2N#5ZdS9X*rF$GvHmTbQwKzE7a', { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user._id , username: user.username , role: user.role}, 'j3eCq!2N#5ZdS9X*rF$GvHmTbQwKzE7a', { expiresIn: '3h' });
         const userID = user._id;
         const userRole = user.role;
         res.json({ token , userID , userRole});

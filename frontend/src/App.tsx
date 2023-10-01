@@ -14,24 +14,44 @@ import AllCourses from './components/AllCourses';
 import EditProfile from './components/EditProfile';
 import ChangePassword from './components/ChangePassword';
 import RegisteredCourses from './components/RegisteredCourses';
+import NavbarAdmin from './components/NavbarAdmin';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState("");
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsLoggedIn(!!token);
+
+    if (token) {
+      fetch('http://localhost:8080/secure-route', {
+        method: 'GET',
+        headers: {
+          Authorization: `${token}`
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        setUserRole(data.role);
+        console.log(userRole);
+      })
+      .catch(error => {
+        console.error('Error fetching user role:', error);
+      });
+    }
   }, []);
 
   return (
     <Router>
       <div>
-        {isLoggedIn ? <NavbarSignIn setIsLoggedIn={setIsLoggedIn} /> : <NavbarNotSignIn />}
+      {isLoggedIn && userRole === 'admin' ? <NavbarAdmin setIsLoggedIn={setIsLoggedIn} /> : isLoggedIn ? <NavbarSignIn setIsLoggedIn={setIsLoggedIn} /> : <NavbarNotSignIn />}
         <Routes>
           <Route path='/' element={<SignIn/>}></Route>
           <Route path='/register' element={<SignUp/>}></Route>
           <Route path="/Course" element={<MainCourse />} />
-          <Route path='/createCourse' element={<CreateCourse/>}/>
-          <Route path='/createLesson' element={<CreateLesson/>}/>
+          <Route path='/createCourse' element={userRole === 'admin' ? <CreateCourse /> : <MainCourse />} />
+          <Route path='/createLesson' element={userRole === 'admin' ? <CreateLesson /> : <MainCourse />} />
           <Route path='/courseDetail/:courseId' element={<CourseDetail/>}></Route>
           <Route path='/courseStudy/:courseId' element={<CourseStudy/>}></Route>
           <Route path='/editProfile/:userId' element={<EditProfile/>}></Route>

@@ -15,11 +15,13 @@ import { useNavigate } from "react-router-dom";
 function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => void }) {
   const navigate = useNavigate();
   const _id = localStorage.getItem('_id') || "";
+  const token = localStorage.getItem('token') || '';
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('_id');
     localStorage.removeItem('role');
     setIsLoggedIn(false);
+    navigate('/');
     handleClose();
   };
 
@@ -55,11 +57,6 @@ function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Online Learning
           </Typography>
-          <IconButton>
-            <Link to='/createCourse'>
-              <AddCircleIcon style={{ color: '#FF5733' }} />
-            </Link>
-          </IconButton>
           <IconButton>
             <Link to={`/myCourses/${_id}`} style={{ textDecoration: 'none' }}>
               <Typography className="navbar-signin-a" variant="body1" style={{ color: '#FF5733', textDecoration: 'none' }}>
