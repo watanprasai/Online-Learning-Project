@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import SchoolIcon from "@mui/icons-material/School";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import PersonIcon from "@mui/icons-material/Person";
+import EditIcon from "@mui/icons-material/Edit";
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { Link } from 'react-router-dom';
@@ -40,6 +41,16 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
         handleClose();
     };
 
+    const clickCreateCourse = () => {
+        navigate(`/createCourse`);
+        handleClose();
+    };
+
+    const clickEditCourse = () => {
+        navigate(`/showCourse`);
+        handleClose();
+    };
+
     const clickMyCourses = () => {
         navigate(`/myCourses/${_id}`);
         handleClose();
@@ -57,6 +68,11 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                 Online Learning
             </Typography>
+            <IconButton>
+                <Link to='/showCourse'>
+                    <EditIcon style={{ color: '#FF5733' }} />
+                </Link>
+            </IconButton>
             <IconButton>
                 <Link to='/createCourse'>
                 <AddCircleIcon style={{ color: '#FF5733' }} />
@@ -86,6 +102,8 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
             >
                 <MenuItem onClick={clickEditProfile}>ข้อมูลส่วนตัว</MenuItem>
                 <MenuItem onClick={clickMyCourses}>คอร์สเรียนของฉัน</MenuItem>
+                <MenuItem onClick={clickCreateCourse}>สร้างคอร์ส</MenuItem>
+                <MenuItem onClick={clickEditCourse}>แก้ไขคอร์ส</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
             </Toolbar>

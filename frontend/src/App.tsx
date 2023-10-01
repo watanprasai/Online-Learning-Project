@@ -15,6 +15,8 @@ import EditProfile from './components/EditProfile';
 import ChangePassword from './components/ChangePassword';
 import RegisteredCourses from './components/RegisteredCourses';
 import NavbarAdmin from './components/NavbarAdmin';
+import EditCourse from './components/EditCourse';
+import ShowCourseAdmin from './components/ShowCourseAdmin';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -52,6 +54,8 @@ function App() {
           <Route path="/Course" element={<MainCourse />} />
           <Route path='/createCourse' element={userRole === 'admin' ? <CreateCourse /> : <MainCourse />} />
           <Route path='/createLesson' element={userRole === 'admin' ? <CreateLesson /> : <MainCourse />} />
+          <Route path='/showCourse' element={userRole === 'admin' ? <ShowCourseAdmin /> : <MainCourse />} />
+          <Route path='/editCourse/:courseId' element={userRole === 'admin' ? <EditCourse /> : <MainCourse />} />
           <Route path='/courseDetail/:courseId' element={<CourseDetail/>}></Route>
           <Route path='/courseStudy/:courseId' element={<CourseStudy/>}></Route>
           <Route path='/editProfile/:userId' element={<EditProfile/>}></Route>

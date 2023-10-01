@@ -699,7 +699,7 @@ app.post('/login', async (req, res) => {
 app.post('/courses/:id/enroll', authMiddleware,async (req, res) => {
     try {
         const courseId = req.params.id;
-        const userId = req.userData.userId; // เอามาจาก token ถ้า token ถูกต้อง
+        const userId = req.userData.userId;
 
         const course = await Course.findById(courseId);
         const user = await User.findById(userId);
@@ -789,6 +789,24 @@ app.get('/courses/:id', async (req,res) => {
         res.status(500).json({ error: 'Cannot retrieve course' });
     }
 });
+
+// getCourse by User ID
+app.get('/courseByUserId',authMiddleware, async (req,res) => {
+    try {
+        const userId = req.userData.userId;
+        const courses = await Course.find({ instructor: userId })
+        .populate('instructor', 'username email')
+        .populate('type', 'name')
+        .populate('lessons', 'title content videoURL quizzes')
+        .populate('enrolledStudents', '_id username email');
+        if (!courses) {
+            return res.status(404).json({ error: 'Courses not found' });
+        }
+        res.json(courses);
+    }catch (error){
+        res.status(500).json({ error: error });
+    }
+})
 
 app.put('/courses/:id', async (req,res) => {
     try {

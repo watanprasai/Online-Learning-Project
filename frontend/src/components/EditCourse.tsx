@@ -1,17 +1,41 @@
-import { Course, Lesson, User , Type} from '../interfaces/ICourse';
-import './css/createcourse.css'
 import { useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave , faCirclePlus} from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from "react-router-dom";
+import { useParams } from 'react-router-dom';
+import { Course, Type, User } from '../interfaces/ICourse';
 import Swal from 'sweetalert2';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSave } from '@fortawesome/free-solid-svg-icons';
 
-function CreateCourse() {
-    const _id = localStorage.getItem('_id') || "";
-    const navigate = useNavigate();
-    const [user , setUser] = useState<User>();
-
+function EditCourse() {
+    const { courseId } = useParams();
+    const [ course , setCourse ] = useState<Course>();
+    const [isLoading, setIsLoading] = useState(true);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [types, setType] = useState<Type[]>([]);
+    const [selectedType, setSelectedType] = useState('');
     const [file, setFile] = useState(null);
+    const [user,setUser] = useState<User>();
+
+    const _id = localStorage.getItem('_id') || "";
+    const getUserbyID = () => {
+        setIsLoading(true);
+            const apiUrl = `http://localhost:8080/users/${_id}`;
+            const option = {
+                method : "GET",
+                headers : { "Content-Type" : "application/json"},  
+            };
+            fetch(apiUrl,option)
+            .then((res) => res.json())
+            .then((res) => {
+                if (res){
+                    setUser(res)
+                }
+                else {
+                    alert("Can not get user by _id");
+                }
+            })
+            setIsLoading(false);
+        }
 
     const handleFileChange = (event: any) => {
         const selectedFile = event.target.files[0];
@@ -32,11 +56,8 @@ function CreateCourse() {
         }
     }
 
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [types, setType] = useState<Type[]>([]);
-    const [selectedType, setSelectedType] = useState('');
     const getType = () => {
+        setIsLoading(true);
         const apiUrl = "http://localhost:8080/types";
         const option = {
             method: "GET",
@@ -52,82 +73,48 @@ function CreateCourse() {
                 alert("Can not get types");
             }
         })
+        setIsLoading(false);
     }
-    const getUserbyID = () => {
-        const apiUrl = `http://localhost:8080/users/${_id}`;
+
+    const getCourse = async () => {
+        setIsLoading(true);
+        const apiUrl = `http://localhost:8080/courses/${courseId}`;
         const option = {
-            method : "GET",
-            headers : { "Content-Type" : "application/json"},  
-        };
-        fetch(apiUrl,option)
-        .then((res) => res.json())
-        .then((res) => {
-            if (res){
-                setUser(res)
-            }
-            else {
-                alert("Can not get user by _id");
-            }
-        })
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }
+        const response = await fetch(apiUrl,option);
+        const res = await response.json();
+        if (res) {
+            setCourse(course);
+            setTitle(res.title);
+            setDescription(res.description);
+            console.log(res.instructor.username);
+        } else {
+            console.log("can not get course");
+        }
+        setIsLoading(false);
     }
 
     const submit = async() => {
-
-        const photo = new FormData();
-        photo.append('file', file || "");
-        const apiUrlUpload = "http://localhost:8080/upload";
-        const optionUpload = {
-            method: "POST",
-            body: photo,
-        };
-        const photoRes = await fetch(apiUrlUpload, optionUpload)
-        const photoName = await photoRes.json()
-   
-        let data = {
-            "title": title,
-            "description": description,
-            "instructor": _id,
-            "type": selectedType,
-            "url": photoName
-        };
-        const apiUrl = "http://localhost:8080/courses";
-        const option = {
-            method: "POST",
-            headers: { "Content-Type" : "application/json",},
-            body: JSON.stringify(data),
-        }
-        const res = await fetch(apiUrl,option);
-        const message = await res.json();
-        
-        if(res.ok){
-            await Swal.fire({
-                title: 'สร้าง Course สำเร็จ',
-                text: 'ระบบจะพาท่านไปที่หน้าเพิ่มเนื้อหา',
-                icon: 'success',
-                confirmButtonText: 'รับทราบ'
-            });
-            navigate(`/createLesson`,{state : {courseID: message._id}});
-        }else {
-            await Swal.fire({
-                title: 'สร้าง Course ไม่สำเร็จ',
-                text: message.error,
-                icon: 'error',
-                confirmButtonText: 'รับทราบ'
-            });
-        }
+        alert("sumbit");
     }
-
+    
     useEffect(() => {
+        getCourse();
         getType();
         getUserbyID();
     },[])
-
     return (
-        <div className="page2">
-            <div className='header'>
-                Course Create
-            </div>
-            <div className="course-create-container">
+        <div>
+            <h2>Edit Course</h2>
+            <p>Editing course with ID: {courseId}</p>
+            {isLoading ? (
+                <div className="loading-spinner">Loading...</div>
+            ) : (
+                <div className="course-create-container">
                 <div className='course-line'>
                     หัวข้อ 
                     <input type="text" id='title' name='title' placeholder='กรอกหัวข้อ' value={title} onChange={(event) => setTitle(event.target.value)}/>
@@ -159,8 +146,10 @@ function CreateCourse() {
                     <button onClick={submit}>บันทึก <FontAwesomeIcon icon={faSave} /></button>
                 </div>
             </div>
+            )}
         </div>
+
     );
 }
 
-export default CreateCourse;
+export default EditCourse;
