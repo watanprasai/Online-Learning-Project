@@ -6,7 +6,6 @@ import './css/coursestudy.css';
 
 function CourseStudy() {
   const [currentLesson, setCurrentLesson] = useState(0);
-  const [progress, setProgress] = useState(0);
   const { courseId } = useParams();
   const [course, setCourse] = useState<Course>();
   const user_id = localStorage.getItem('_id') || '';
@@ -18,7 +17,7 @@ function CourseStudy() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [quizData, setQuizData] = useState<Quiz[] | undefined>();
-
+  const [lessonId , setLessonId] = useState();
   const [timer, setTimer] = useState(0);
   const [intervalId, setIntervalId] = useState<null | NodeJS.Timer>(null);
 
@@ -35,35 +34,47 @@ function CourseStudy() {
     if (intervalId) {
       clearInterval(intervalId);
       setIntervalId(null);
-  
-      const currentPercentageWatched = (timer / videoDuration) * 100;
-      console.log("Timer: ",timer);
-      console.log("percentage: ", currentPercentageWatched);
-      // ทำการอัพเดตความคืบหน้าในฐานข้อมูล
-      const apiUrlProgress = 'http://localhost:8080/updateOrCreateVideoProgress';
-      const optionProgress = {
-        method: 'POST',
+      const apiUrl = `http://localhost:8080/getProgress/${lessonId}`;
+      const option = {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `${token}`,
         },
-        body: JSON.stringify({
-          courseId: courseId,
-          lessonId: lessons[currentLesson]._id,
-          videoProgress: currentPercentageWatched,
-        }),
       };
-      fetch(apiUrlProgress, optionProgress)
+      fetch(apiUrl, option)
         .then((res) => res.json())
         .then((res) => {
-          console.log(res);
+          console.log(Math.round(res.videoProgress));
+          const currentPercentageWatched = (timer / videoDuration) * 100;
+          if (res.videoProgress > currentPercentageWatched) {
+            return
+          } else {
+            const apiUrlProgress = 'http://localhost:8080/updateOrCreateVideoProgress';
+            const optionProgress = {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `${token}`,
+              },
+              body: JSON.stringify({
+                courseId: courseId,
+                lessonId: lessons[currentLesson]._id,
+                videoProgress: currentPercentageWatched,
+              }),
+            };
+            fetch(apiUrlProgress, optionProgress)
+              .then((res) => res.json())
+              .then((res) => {
+                console.log(res);
+              })
+              .catch((error) => {
+                console.error('เกิดข้อผิดพลาดในการอัพเดตความคืบหน้าวิดีโอ', error);
+              });
+          }
         })
-        .catch((error) => {
-          console.error('เกิดข้อผิดพลาดในการอัพเดตความคืบหน้าวิดีโอ', error);
-        });
     }
   };
-  
   
   const getCourseDetail = () => {
     const apiUrl = `http://localhost:8080/courses/${courseId}`;
@@ -91,6 +102,12 @@ function CourseStudy() {
         }
       });
   };
+  
+  const loadLessonData = async() => {
+    if (lessons[currentLesson]?._id) {
+      setLessonId(lessons[currentLesson]._id)
+    }
+  }
 
   const getQuizDetail = () => {
     if (lessons[currentLesson]?.quizzes.length > 0) {
@@ -117,14 +134,7 @@ function CourseStudy() {
     }
   };
 
-  const loadLessonData = () => {
-    if (course && isEnrolled) {
-      if (lessons.length > 0) {
-        const newProgress = ((currentLesson + 1) / lessons.length) * 100;
-        setProgress(newProgress);
-      }
-    }
-  };
+
 
   const goToNextLesson = () => {
     if (currentLesson < lessons.length - 1) {
@@ -150,7 +160,6 @@ function CourseStudy() {
               width="320"
               height="240"
               controls
-              onTimeUpdate={handleVideoTimeUpdate}
               onLoadedData={handleVideoLoadedData}
               onPlay={startVideoTimer}
               onPause={stopVideoTimer} 
@@ -165,18 +174,6 @@ function CourseStudy() {
         )}
       </div>
     );
-  };
-  
-  const handleVideoTimeUpdate = (event: any) => {
-    const currentTimeInVideo = event.target.currentTime;
-    const videoDuration = event.target.duration;
-    const percentageWatched = (currentTimeInVideo / videoDuration) * 100;
-  
-    if (percentageWatched < progress) {
-      setProgress(progress);
-    } else {
-      setProgress(percentageWatched);
-    }
   };
   
   const handleVideoLoadedData = (event: any) => {

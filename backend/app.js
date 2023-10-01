@@ -307,21 +307,25 @@ app.post('/updateQuizProgress', authMiddleware, async (req,res) => {
 });
 
 // Get Progress by lessonId
-app.get('/getProgress/:lessonId', async (req,res) => {
+app.get('/getProgress/:lessonId',authMiddleware, async (req,res) => {
+    const userId = req.userData.userId;
     const lessonId = req.params.lessonId;
-    const progress = await Progress.find({lesson: lessonId});
+    const progress = await Progress.findOne({
+        lesson: lessonId, 
+        user: userId,
+    });
     if (!progress || progress.length === 0) {
-        return res.status(404).json({ error: 'progress not found' });
+        return res.json({ error: 'progress not found' });
     }
     res.json(progress);
-})
+});
 
 // Update Video Progress or Create if not exists
 app.post('/updateOrCreateVideoProgress', authMiddleware, async (req, res) => {
     try {
         const userId = req.userData.userId;
         const { courseId, lessonId, videoProgress } = req.body;
-
+        const user = await User.findById(userId);
         const existingProgress = await Progress.findOne({
             user: userId,
             course: courseId,
@@ -340,6 +344,8 @@ app.post('/updateOrCreateVideoProgress', authMiddleware, async (req, res) => {
                 videoProgress: videoProgress
             });
             await progress.save();
+            user.progress.push(progress);
+            await user.save();
             res.status(201).json({ message: 'สร้างความคืบหน้าของวิดีโอสำเร็จ' });
         }
     } catch (error) {
@@ -602,7 +608,6 @@ app.get('/getuser', authMiddleware, async (req, res) => {
         res.status(500).json({ error: 'Cannot retrieve user' });
     }
 });
-
 
 app.put('/users/:id', async (req,res) => {
     try {

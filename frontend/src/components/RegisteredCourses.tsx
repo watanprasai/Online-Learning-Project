@@ -4,12 +4,13 @@ import { useParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { Link } from 'react-router-dom';
-import VisibilityIcon from '@mui/icons-material/Visibility'; // Import Visibility icon from @mui/icons-material
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const RegisteredCourses = () => {
   const [user, setUser] = useState<User>();
   const { userId } = useParams();
   const token = localStorage.getItem('token') || '';
+  const [progress, setProgress] = useState<any[]>([]);
   const fetchUserData = async () => {
     try {
       const apiUrl = 'http://localhost:8080/getuser';
@@ -37,7 +38,12 @@ const RegisteredCourses = () => {
     {
       field: 'instructorName',
       headerName: 'Instructor',
-      width: 1100,
+      width: 950,
+    },
+    {
+      field: 'progress',
+      headerName: 'Progress',
+      width: 150,
     },
     {
       field: 'details',
@@ -50,16 +56,100 @@ const RegisteredCourses = () => {
       ),
     },
   ];
+  
+
+  const rows = user?.courseEnrolled.map((course, index) => {
+    const courseProgress = progress[index];
+    if (!courseProgress) {
+      return {
+        id: course._id,
+        title: course.title,
+        instructorName: course.instructor.username,
+        videoProgress: 'N/A',
+        quizAnswer: 'N/A',
+        overallProgress: 'N/A',
+      };
+    }
+    return {
+      id: course._id,
+      title: course.title,
+      instructorName: course.instructor.username,
+      progress: Math.round(courseProgress.overallProgress) + '%',
+    };
+  }) || [];
+  
+  const lessonIdArray = user?.courseEnrolled.map((course) => {
+    return course.lessons;
+  });
+  
+  if (lessonIdArray && lessonIdArray.length > 0) {
+    const getProgressPromises = lessonIdArray.map((lessonIds) => {
+      const progressPromises = lessonIds.map((lessonId) => {
+        const apiUrl = `http://localhost:8080/getProgress/${lessonId}`;
+        const option = {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `${token}`,
+          },
+        };
+        return fetch(apiUrl, option)
+          .then((response) => {
+            return response.json();
+          })
+          .catch((error) => {
+            console.error('มีข้อผิดพลาดในการร้องขอข้อมูล progress:', error);
+            return null; 
+          });
+      });
+      return Promise.all(progressPromises);
+    });
+  
+    Promise.all(getProgressPromises)
+      .then((progressData) => {
+        const progressPercentrage = calculateCourseProgress(progressData);
+        setProgress(progressPercentrage);
+      })
+      .catch((error) => {
+        console.error('มีข้อผิดพลาดในการร้องขอข้อมูล progress:', error);
+      });
+  } else {
+    console.log('ไม่มี LessonId ในตารางคอร์สที่ลงทะเบียนของผู้ใช้งาน');
+  }
+  
+  function calculateCourseProgress(progressData:any) {
+    return progressData.map((progress:any) => {
+      
+      let videoProgressTotal = 0;
+      let quizAnswerPercentage = 0;
+
+      progress.forEach((item:any) => {
+        if (item.videoProgress !== undefined) {
+          videoProgressTotal += item.videoProgress;
+        }
+        if (item.quizAnswer && item.quizAnswer.length > 0) {
+          quizAnswerPercentage = 100;
+        }
+      });
+  
+      const videoProgressPercentage = videoProgressTotal;
+      const overallProgress = (videoProgressPercentage + quizAnswerPercentage) / progress.length;
+      progress = {
+        videoProgressPercentage,
+        quizAnswerPercentage,
+        overallProgress,
+      };
+      return {
+        videoProgressPercentage,
+        quizAnswerPercentage,
+        overallProgress,
+      };
+    });
+  }
 
   useEffect(() => {
     fetchUserData();
   }, []);
-
-  const rows = user?.courseEnrolled.map((course) => ({
-    id: course._id,
-    title: course.title,
-    instructorName: course.instructor.username,
-  })) || [];
 
   return (
     <div>
