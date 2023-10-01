@@ -136,7 +136,20 @@ function CreateLesson() {
 
     const handleVideoChange = (event: any) => {
         const selectedVideo = event.target.files[0];
-        setVideo(selectedVideo);
+        if (selectedVideo && selectedVideo.type.startsWith('image/')) {
+            Swal.fire({
+                title: 'กรุณาเลือกวิดีโอเท่านั้น',
+                icon: 'warning',
+                confirmButtonText: 'ตกลง',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setVideo(null);
+                    window.location.reload();
+                }
+            });
+        } else {
+            setVideo(selectedVideo);
+        }
     }
 
     const addVideoForm = () => {
@@ -149,7 +162,7 @@ function CreateLesson() {
                 <div className="lesson-line">เนื้อหา<input type="text" id='content' name='content' placeholder='กรอกรายละเอียดเนื้อหา' value={content} onChange={(event) => setContent(event.target.value)} /></div>
                 <div className="lesson-line-upload">
                     Video
-                    <input type="file" id='video' name='video' onChange={handleVideoChange} />
+                    <input type="file" id='video' name='video' onChange={handleVideoChange} accept="video/*" />
                 </div>
                 <div className="course-create-button">
                     <button onClick={submit}>บันทึก <FontAwesomeIcon icon={faSave} /></button>
@@ -157,6 +170,7 @@ function CreateLesson() {
             </div>
         )
     }
+    
 
     const createQuizForm = () => {
         const areOptionsEmpty = questions.some((question) =>

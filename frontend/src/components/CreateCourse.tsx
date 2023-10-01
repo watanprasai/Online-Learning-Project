@@ -15,7 +15,21 @@ function CreateCourse() {
 
     const handleFileChange = (event: any) => {
         const selectedFile = event.target.files[0];
-        setFile(selectedFile);
+    
+        if (selectedFile && selectedFile.type.startsWith('image/')) {
+            setFile(selectedFile);
+        } else {
+            Swal.fire({
+                title: 'กรุณาเลือกไฟล์รูปภาพเท่านั้น',
+                icon: 'warning',
+                confirmButtonText: 'ตกลง',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setFile(null);
+                    window.location.reload();
+                }
+            });
+        }
     }
 
     const [title, setTitle] = useState('');
@@ -139,7 +153,7 @@ function CreateCourse() {
                 </div>
                 <div className='course-line-upload'>
                     รูปปก
-                    <input type="file" id='file' name='file' onChange={handleFileChange} />
+                    <input type="file" id='file' name='file' accept='image/*' onChange={handleFileChange} />
                 </div>
                 <div className="course-create-button">
                     <button onClick={submit}>บันทึก <FontAwesomeIcon icon={faSave} /></button>
