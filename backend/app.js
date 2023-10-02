@@ -213,6 +213,58 @@ app.post('/lessons/:lessonId/quizzes', authMiddleware, async (req, res) => {
     }
 });
 
+// Option
+app.post('/options', authMiddleware, async (req, res) => {
+    try {
+        const option = req.body.option;
+
+        const newOption = new Option({
+            option,
+        });
+
+        await newOption.save();
+        
+        res.status(201).json({ _id: newOption._id });
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot create option' });
+    }
+});
+
+// Update Quiz
+app.post('/updateQuiz', authMiddleware, async (req, res) => {
+    try {
+        const { _id, question, options, correctOption , lessonId } = req.body;
+
+        if (!_id) {
+            const quiz = new Quiz({
+                question: question,
+                options: options,
+                correctOption: correctOption,
+                lesson: lessonId,
+            });
+            await quiz.save();
+        }
+        else {
+            const updatedQuiz = await Quiz.findByIdAndUpdate(
+                _id,
+                {
+                    question: question,
+                    options: options,
+                    correctOption: correctOption,
+                },
+                { new: true }
+            );
+            if (!updatedQuiz) {
+                return res.status(404).json({ error: 'ไม่พบควิซที่ต้องการอัปเดต' });
+            }
+            res.status(200).json({ message: 'อัปเดตควิซสำเร็จ' });
+        }
+        
+    } catch (error) {
+        res.status(500).json({ error: 'ไม่สามารถอัปเดตควิซ' });
+    }
+});
+
 app.get('/quizzes/:quizId', authMiddleware, async (req, res) => {
     try {
         const quizId = req.params.quizId;
@@ -240,6 +292,28 @@ app.get('/quizzes-lesson/:lessonId', authMiddleware, async (req,res) => {
         res.status(500).json({ error: 'Cannot get quiz' });
     }
 })
+
+// Delete Quiz
+app.delete('/quizzes/:quizId', authMiddleware, async (req, res) => {
+    try {
+        const quizId = req.params.quizId;
+
+        const deletedQuiz = await Quiz.findByIdAndRemove(quizId);
+
+        if (!deletedQuiz) {
+            return res.status(404).json({ error: 'ควิซที่ต้องการลบไม่พบ' });
+        }
+
+        const lessonId = deletedQuiz.lesson;
+        await Lesson.findByIdAndUpdate(lessonId, { $pull: { quizzes: quizId }});
+
+        await QuizAnswer.deleteMany({ quiz: quizId });
+
+        res.status(200).json({ message: 'ลบควิซสำเร็จ' });
+    } catch (error) {
+        res.status(500).json({ error: 'ไม่สามารถลบควิซ' });
+    }
+});
 
 // Check Quiz Answer
 app.post('/checkQuizAnswer', authMiddleware, async (req, res) => {
@@ -366,23 +440,6 @@ app.get('/getProgress',async (req,res) => {
 
         res.json(progresses);
 })
-
-// Option
-app.post('/options', authMiddleware, async (req, res) => {
-    try {
-        const option = req.body.option;
-
-        const newOption = new Option({
-            option,
-        });
-
-        await newOption.save();
-        
-        res.status(201).json({ _id: newOption._id });
-    } catch (error) {
-        res.status(500).json({ error: 'Cannot create option' });
-    }
-});
 
 app.get('/options/:quizId', async (req, res) => {
     try {
@@ -780,6 +837,24 @@ app.get('/courses/:id', async (req,res) => {
         .populate('instructor', 'username email')
         .populate('type', 'name')
         .populate('lessons', 'title content videoURL quizzes')
+        .populate({
+            path: 'lessons',
+            populate: {
+                path: 'quizzes',
+                populate: {
+                    path: 'options',
+                },
+            },
+        })
+        .populate({
+            path: 'lessons',
+            populate: {
+                path: 'quizzes',
+                populate: {
+                    path: 'correctOption',
+                },
+            },
+        })
         .populate('enrolledStudents', '_id username email');
         if (!course) {
             return res.status(404).json({ error: 'Course not found' });

@@ -27,6 +27,7 @@ export interface User {
     question: string;
     options: Option[];
     correctOption: Option;
+    lesson: string;
     createdAt: Date;
     updatedAt: Date;
   }

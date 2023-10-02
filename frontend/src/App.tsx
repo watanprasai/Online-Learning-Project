@@ -17,6 +17,7 @@ import RegisteredCourses from './components/RegisteredCourses';
 import NavbarAdmin from './components/NavbarAdmin';
 import EditCourse from './components/EditCourse';
 import ShowCourseAdmin from './components/ShowCourseAdmin';
+import GreetingCard from './components/GreetingCard';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -36,14 +37,18 @@ function App() {
       .then(response => response.json())
       .then(data => {
         setUserRole(data.role);
-        console.log(userRole);
       })
       .catch(error => {
         console.error('Error fetching user role:', error);
       });
     }
   }, []);
-
+  const greetingCardData = {
+    recipientName: "John Doe",
+    awardingOrganization: "Your Organization",
+    awardDate: "October 1, 2023",
+    message: "Congratulations on your achievement!",
+  };
   return (
     <Router>
       <div>
@@ -61,7 +66,9 @@ function App() {
           <Route path='/editProfile/:userId' element={<EditProfile/>}></Route>
           <Route path='/editProfile/:userId/changePassword' element={<ChangePassword/>}></Route>
           <Route path='/myCourses/:userId' element={<RegisteredCourses/>}></Route>
+          <Route path='/certificate' element={<GreetingCard {...greetingCardData} />} />
           <Route path="/allCourse/:page" element={<AllCourses />}/>
+          
         </Routes>
       </div>
     </Router>
