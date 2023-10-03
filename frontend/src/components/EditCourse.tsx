@@ -501,11 +501,11 @@ function EditCourse() {
 
     console.log(questions);
     return (
-        <div>
+        <div className='edit-course-page'>
             {isLoading ? (
                 <div className="loading-spinner"></div>
             ) : (
-                <div className="course-create-container">
+                <div className="edit-update-lesson-container">
                     <div className="course-line">
                         หัวข้อ
                         <input
@@ -559,16 +559,20 @@ function EditCourse() {
                         รูปปก
                         <input type="file" id="file" name="file" accept="image/*" onChange={handleFileChange} />
                     </div>
-                    <div className="course-create-button">
-                        <button onClick={submit}>
-                            แก้ไข <FontAwesomeIcon icon={faSave} />
-                        </button>
+                    
+                    <div className="edit-course-course-button-line">
+                         <div className="edit-course-update-button">
+                            <button onClick={submit}>
+                                แก้ไข <FontAwesomeIcon icon={faSave} />
+                            </button>
+                        </div>
+                        <div className="edit-course-remove-button">
+                            <button onClick={handleDeleteCourse}>
+                                ลบคอร์ส <FontAwesomeIcon icon={faTrash} />
+                            </button>
+                        </div>
                     </div>
-                    <div className="course-create-button">
-                        <button onClick={handleDeleteCourse}>
-                            ลบคอร์ส <FontAwesomeIcon icon={faTrash} />
-                        </button>
-                    </div>
+                    
                     <div className="lessons-list">
                         <h3>บทเรียน</h3>
                         <ul>

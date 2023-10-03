@@ -20,3 +20,83 @@
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
+
+.edit-course-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #D8D9DA;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+ul ,li {
+    list-style-type: none;
+}
+
+.edit-update-lesson-container {
+    display: flex;
+    flex-direction: column;
+    width: 1000px;
+    background-color: white;
+    border-radius: 10px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+
+.edit-course-course-button-line {
+    display: flex;
+    justify-content: right;
+}
+
+.edit-course-update-button{
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-right: 20px;
+}
+
+.edit-course-update-button button {
+    height: 40px;
+    width: 80px;
+    color: black;
+    background-color: rgb(127, 190, 0);
+    border: 0px;
+    border-radius: 10px;
+    transition: all 0.5s;
+    cursor: pointer;
+}
+
+.edit-course-update-button button:hover {
+    color: white;
+    background-color: green;
+}
+
+.edit-course-remove-button{
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-right: 40px;
+}
+
+.edit-course-remove-button button {
+    height: 40px;
+    width: 80px;
+    color: white;
+    background-color: rgb(236, 68, 68);
+    border: 0px;
+    border-radius: 10px;
+    transition: all 0.5s;
+    cursor: pointer;
+}
+
+.edit-course-remove-button button:hover {
+    color: black;
+    background-color: rgb(204, 39, 39);
+}
