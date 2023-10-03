@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { Link } from 'react-router-dom';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import './css/registercourse.css';
 
 const RegisteredCourses = () => {
   const [user, setUser] = useState<User>();
@@ -151,8 +152,8 @@ const RegisteredCourses = () => {
   }, []);
 
   return (
-    <div>
-      <h2>รายการคอร์สที่ลงทะเบียน</h2>
+    <div className='register-course-page'>
+      <h2 className='register-course-header'>รายการคอร์สที่ลงทะเบียน</h2>
       <Box sx={{ height: 400, width: '80%', margin: 'auto' }}>
         <DataGrid
           rows={rows}

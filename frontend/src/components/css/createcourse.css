@@ -1,6 +1,7 @@
 .page2 {
     width: 100%;
     height: 89vh;
+    max-height: 100%;
     background-color: #D8D9DA;
     display: flex;
     flex-direction: column;

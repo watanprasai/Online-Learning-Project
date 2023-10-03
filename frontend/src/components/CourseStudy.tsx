@@ -232,7 +232,7 @@ function CourseStudy() {
           text: `คุณได้ ${correctAnswers} / ${totalQuestions} คะแนน`,
           showCancelButton: true,
           cancelButtonText: 'ทำแบบทดสอบใหม่',
-          confirmButtonText: 'ไปบทเรียนถัดไป',
+          confirmButtonText: 'ยืนยัน',
           reverseButtons: true,
         }).then((result) => {
           if (result.isConfirmed) {

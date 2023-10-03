@@ -26,7 +26,7 @@ function EditCourse() {
         {
             _id: '', 
             question: '',
-            options: ['', '', ''],
+            options: ['', '', '',''],
             correctOption: '',
             lessonId: '',
         },
@@ -50,14 +50,14 @@ function EditCourse() {
         setQuestions(newQuestions);
     };
     
-    const handleAddQuestion = () => {
+    const handleAddQuestion = (index:any) => {
         const newQuestions = [...questions];
         newQuestions.push({
             _id: '',
             question: '',
-            options: ['', '', ''],
+            options: ['', '', '',''],
             correctOption: '',
-            lessonId: '',
+            lessonId: lessons[index]._id,
         });
         setQuestions(newQuestions);
     };
@@ -156,8 +156,6 @@ function EditCourse() {
             }
         }
     };
-    
-    
     
     const handleAddOption = (questionIndex:any) => {
         const newQuestions = [...questions];
@@ -391,12 +389,6 @@ function EditCourse() {
             });
         }
     }
-    
-    const areOptionsEmpty = questions.some((question) =>
-            question.question.trim() === '' ||
-            question.options.some((option) => option.trim() === '') ||
-            question.correctOption.trim() === ''
-    );
 
     const submitQuizLesson = async () => {
         setIsLoading(true);
@@ -427,7 +419,7 @@ function EditCourse() {
             }
             return result._id;
         }));
-    
+
         let currentIndex = 0;
         for (const question of questions) {
             const numOptions = question.options.length;
@@ -597,9 +589,8 @@ function EditCourse() {
                                                         placeholder='กรอกชื่อบทเรียน'
                                                         value={lesson.title}
                                                         className='titleBox-quiz'
-                                                        
                                                     />
-                                                    <button onClick={handleAddQuestion} className='add-question-button'>
+                                                    <button onClick={() => handleAddQuestion(index)} className='add-question-button'>
                                                         เพิ่มคำถาม <FontAwesomeIcon icon={faPlus} />
                                                     </button>
                                                     </div>

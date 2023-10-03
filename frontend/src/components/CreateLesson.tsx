@@ -19,7 +19,7 @@ function CreateLesson() {
     const [questions, setQuestions] = useState([
         {
             question: '',
-            options: ['', '', ''],
+            options: ['', '', '',''],
             correctOption: '',
         },
     ]);
@@ -113,7 +113,7 @@ function CreateLesson() {
             setQuestions([
                 {
                     question: '',
-                    options: ['', '', ''],
+                    options: ['', '', '',''],
                     correctOption: '',
                 },
             ]);

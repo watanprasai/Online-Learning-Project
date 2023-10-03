@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Course } from '../interfaces/ICourse';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Link } from 'react-router-dom';
-import EditIcon from '@mui/icons-material/Edit'; // เพิ่ม import สำหรับ EditIcon
+import EditIcon from '@mui/icons-material/Edit';
+import './css/showcourseadmin.css';
 
 function ShowCourseAdmin() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -20,7 +21,6 @@ function ShowCourseAdmin() {
     fetch(apiUrl, option)
       .then((response) => response.json())
       .then((data) => {
-        // ใช้ map เพื่อแปลง JSON และระบุค่า id ในแต่ละแถว
         const formattedCourses = data.map((course: any) => ({
           id: course._id,
           title: course.title,
@@ -48,16 +48,16 @@ function ShowCourseAdmin() {
       width: 150,
       renderCell: (params) => (
         <Link to={`/editCourse/${params.row.id}`}>
-          <EditIcon /> {/* ใช้ EditIcon แทนคำ Edit */}
+          <EditIcon />
         </Link>
       ),
     },
-    // เพิ่มคอลัมน์อื่น ๆ ตามความต้องการ
+
   ];
 
   return (
-    <div>
-      <h2>รายการคอร์ส</h2>
+    <div className='show-course-admin-page'>
+      <h2 className='show-course-admin-header'>รายการคอร์ส</h2>
       <div style={{ height: 400, width: '80%', margin: 'auto'}}>
         <DataGrid rows={courses} columns={columns} autoPageSize />
       </div>

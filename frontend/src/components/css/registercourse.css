@@ -1,0 +1,13 @@
+.register-course-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.register-course-header {
+    margin-top: 30px;
+    font-size: 23px;
+    text-decoration: underline;
+}

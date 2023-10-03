@@ -236,13 +236,17 @@ app.post('/updateQuiz', authMiddleware, async (req, res) => {
         const { _id, question, options, correctOption , lessonId } = req.body;
 
         if (!_id) {
-            const quiz = new Quiz({
-                question: question,
-                options: options,
-                correctOption: correctOption,
+            const newQuiz = new Quiz({
+                question,
+                options,
+                correctOption,
                 lesson: lessonId,
             });
-            await quiz.save();
+            await newQuiz.save();
+    
+            await Lesson.findByIdAndUpdate(lessonId, { $push: { quizzes: newQuiz._id }});
+    
+            return res.status(201).json(newQuiz);
         }
         else {
             const updatedQuiz = await Quiz.findByIdAndUpdate(
@@ -259,7 +263,6 @@ app.post('/updateQuiz', authMiddleware, async (req, res) => {
             }
             res.status(200).json({ message: 'อัปเดตควิซสำเร็จ' });
         }
-        
     } catch (error) {
         res.status(500).json({ error: 'ไม่สามารถอัปเดตควิซ' });
     }
