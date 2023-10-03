@@ -4,11 +4,31 @@ export interface User {
     email: string;
     password: string;
     role: string;
+    progress: Progress[];
     courseEnrolled: Course[];
     createdAt: Date;
     updatedAt: Date;
   }
   
+  export interface Progress {
+    _id: string;
+    user: User;
+    course: Course;
+    lesson: Lesson;
+    quizAnswer: QuizAnswer[];
+    createdAt: Date;
+    updatedAt: Date;
+  }
+  
+  export interface QuizAnswer {
+    _id: string;
+    quiz: Quiz;
+    answer: Option;
+    isCorrect: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
   export interface Course {
     _id: string;
     title: string;

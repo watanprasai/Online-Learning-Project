@@ -659,7 +659,8 @@ app.get('/getuser', authMiddleware, async (req, res) => {
                     path: 'instructor',
                     select: 'username email'
                 }
-            });
+            })
+            .populate('progress');
         res.json(user);
     } catch (error) {
         res.status(500).json({ error: 'Cannot retrieve user' });
@@ -892,14 +893,33 @@ app.put('/courses/:id', async (req,res) => {
     }
 });
 
-app.delete('/courses/:id', async (req,res) =>{
+app.delete('/courses/:id', async (req, res) => {
     try {
-        await Course.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Course deleted successfully'});
-    }catch (error){
-        res.status(400).json({ error: 'Cannot delete course' });
+        const courseId = req.params.id;
+        const progressData = await Progress.find({ course: courseId }).populate('user', 'username');
+        await Lesson.deleteMany({ course: courseId });
+        await Progress.deleteMany({ course: courseId });
+        await Course.findByIdAndDelete(courseId);
+
+        for (const progress of progressData) {
+            if (!progress.user) {
+                continue;
+            }
+            const user = await User.findById(progress.user._id);
+            if (user) {
+                user.progress.pull(progress._id);
+                await user.courseEnrolled.pull(courseId);
+                await user.save();
+            }
+        }
+
+        res.json({ message: 'Course and related data deleted successfully' });
+    } catch (error) {
+        res.status(400).json({ error: 'Cannot delete course and related data' });
     }
 });
+
+
 
 // Lesson CRUD
 

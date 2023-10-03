@@ -17,7 +17,7 @@ import RegisteredCourses from './components/RegisteredCourses';
 import NavbarAdmin from './components/NavbarAdmin';
 import EditCourse from './components/EditCourse';
 import ShowCourseAdmin from './components/ShowCourseAdmin';
-import GreetingCard from './components/GreetingCard';
+import GetCertificate from './components/GetCertificate';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -66,9 +66,8 @@ function App() {
           <Route path='/editProfile/:userId' element={<EditProfile/>}></Route>
           <Route path='/editProfile/:userId/changePassword' element={<ChangePassword/>}></Route>
           <Route path='/myCourses/:userId' element={<RegisteredCourses/>}></Route>
-          <Route path='/certificate' element={<GreetingCard {...greetingCardData} />} />
           <Route path="/allCourse/:page" element={<AllCourses />}/>
-          
+          <Route path="/getCertificate/:courseId/:userId" element={<GetCertificate />}/>
         </Routes>
       </div>
     </Router>

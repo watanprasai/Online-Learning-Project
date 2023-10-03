@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams , useNavigate } from 'react-router-dom';
 import { Course, Lesson, Type, User } from '../interfaces/ICourse';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave, faPlus} from '@fortawesome/free-solid-svg-icons';
+import { faSave, faPlus , faTrash} from '@fortawesome/free-solid-svg-icons';
 import './css/editcourse.css'
 
 function EditCourse() {
@@ -21,6 +21,7 @@ function EditCourse() {
     const [lessonQuizzes, setLessonQuizzes] = useState<Lesson[]>([]);
     const _id = localStorage.getItem('_id') || '';
     const token = localStorage.getItem('token') || '';
+    const navigate = useNavigate();
     const [questions, setQuestions] = useState([
         {
             _id: '', 
@@ -98,6 +99,65 @@ function EditCourse() {
             }
         });
     };
+
+    const handleDeleteCourse = async () => {
+        const isConfirmed = await Swal.fire({
+            title: 'คุณแน่ใจหรือไม่ที่จะลบคอร์สนี้?',
+            text: 'กรุณากรอกชื่อคอร์สเพื่อยืนยันการลบ:',
+            input: 'text',
+            showCancelButton: true,
+            confirmButtonText: 'ลบ',
+            cancelButtonText: 'ยกเลิก',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'คุณต้องกรอกชื่อคอร์สเพื่อยืนยันการลบ';
+                }
+            }
+        });
+    
+        if (isConfirmed.isConfirmed) {
+            const courseName = isConfirmed.value;
+            if (courseName === title) {
+                const apiUrl = `http://localhost:8080/courses/${courseId}`;
+                const options = {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
+    
+                try {
+                    const response = await fetch(apiUrl, options);
+    
+                    if (response.ok) {
+                        await Swal.fire({
+                            icon: 'success',
+                            text: `คอร์ส "${courseName}" ถูกลบเรียบร้อยแล้ว`,
+                        });
+                        navigate('/showCourse');
+                    } else {
+                        await Swal.fire({
+                            icon: 'error',
+                            text: 'เกิดข้อผิดพลาดในการลบคอร์ส',
+                        });
+                    }
+                } catch (error) {
+                    console.error('เกิดข้อผิดพลาดในการส่งคำขอ:', error);
+                    await Swal.fire({
+                        icon: 'error',
+                        text: 'เกิดข้อผิดพลาดในการลบคอร์ส',
+                    });
+                }
+            } else {
+                await Swal.fire({
+                    icon: 'error',
+                    text: 'ชื่อคอร์สที่คุณกรอกไม่ตรงกับชื่อคอร์ส',
+                });
+            }
+        }
+    };
+    
+    
     
     const handleAddOption = (questionIndex:any) => {
         const newQuestions = [...questions];
@@ -512,6 +572,11 @@ function EditCourse() {
                             แก้ไข <FontAwesomeIcon icon={faSave} />
                         </button>
                     </div>
+                    <div className="course-create-button">
+                        <button onClick={handleDeleteCourse}>
+                            ลบคอร์ส <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                    </div>
                     <div className="lessons-list">
                         <h3>บทเรียน</h3>
                         <ul>
@@ -599,19 +664,6 @@ function EditCourse() {
                                                                 </button>
                                                         </div>
                                                     <div className="custom-button-line-save">
-                                                    <button onClick={() => {
-                                                        if (areOptionsEmpty) {
-                                                            Swal.fire({
-                                                                title: 'กรุณากรอกตัวเลือกที่ถูกต้องสำหรับทุกคำถาม',
-                                                                icon: 'warning',
-                                                                confirmButtonText: 'ตกลง',
-                                                            });
-                                                        } else {
-                                                            alert("save");
-                                                        }
-                                                    }} className="custom-button-save-option">
-                                                        บันทึกคำถาม
-                                                    </button>
                                                 </div>
                                                 </div>  
                                             </div>

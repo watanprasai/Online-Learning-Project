@@ -26,7 +26,6 @@ const RegisteredCourses = () => {
         throw new Error('มีข้อผิดพลาดในการร้องขอข้อมูล');
       }
       const userData = await response.json();
-      console.log(userData);
       setUser(userData);
     } catch (error) {
       console.error('มีข้อผิดพลาดในการร้องขอข้อมูล:', error);

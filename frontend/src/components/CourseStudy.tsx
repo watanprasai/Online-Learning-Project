@@ -12,7 +12,6 @@ function CourseStudy() {
   const token = localStorage.getItem('token') || '';
   const [isEnrolled, setIsEnrolled] = useState<boolean>();
   const [lessons, setLessons] = useState<any[]>([]);
-  const [currentTime, setCurrentTime] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -133,8 +132,6 @@ function CourseStudy() {
       setQuizData(undefined);
     }
   };
-
-
 
   const goToNextLesson = () => {
     if (currentLesson < lessons.length - 1) {
@@ -369,6 +366,7 @@ function CourseStudy() {
   useEffect(() => {
     getQuizDetail();
   }, [currentLesson, lessons]);
+
 
   return (
     <div className="course-study-container">

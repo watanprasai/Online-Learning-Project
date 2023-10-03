@@ -139,3 +139,19 @@
     font-size: 20px;
     font-weight: bold;
 }
+
+.click-to-certificate {
+    text-decoration: none;
+    background-color: transparent; 
+    border: none; 
+    color: rgb(41, 41, 58); 
+    cursor: pointer; 
+    font-weight: bold; 
+    padding: 0;
+}
+
+
+.click-to-certificate:hover {
+    color: darkblue;
+    text-decoration: underline; 
+}

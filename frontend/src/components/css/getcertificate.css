@@ -1,0 +1,42 @@
+.certificate-container {
+    text-align: center;
+    background-color: #f5f5f5;
+    padding-top: 48px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    width: 100vw;
+    height: 86vh;
+    margin: 0 auto;
+}
+
+.certificate-image {
+    max-width: 100%;
+    border: 2px solid navy;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.download-button {
+    background-color: navy;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.download-button:hover {
+    background-color: #001f3f;
+}
+
+.certificate-header {
+    color: navy;
+    font-size: 24px;
+    }
+
+.certificate-text {
+    color: #333;
+    font-size: 18px;
+}
