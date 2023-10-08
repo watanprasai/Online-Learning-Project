@@ -21,7 +21,7 @@ function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
     localStorage.removeItem('_id');
     localStorage.removeItem('role');
     setIsLoggedIn(false);
-    navigate('/');
+    navigate('/login');
     handleClose();
   };
 
@@ -49,7 +49,7 @@ function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" style={{ background: '#272829' }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between'}}>
-          <Link to="/Course">
+          <Link to="/">
             <IconButton sx={{ mr: 2 }}>
               <SchoolIcon style={{ color: '#FF5733' }} />
             </IconButton>

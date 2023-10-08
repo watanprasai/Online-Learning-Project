@@ -213,7 +213,7 @@ function SignIn() {
                 localStorage.setItem('token', token);
                 localStorage.setItem('_id', _id);
                 localStorage.setItem('role', role);
-                navigate('/Course'); 
+                navigate('/'); 
                 window.location.reload();
             } else {
                 await Swal.fire({

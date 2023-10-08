@@ -54,9 +54,9 @@ function App() {
       <div>
       {isLoggedIn && userRole === 'admin' ? <NavbarAdmin setIsLoggedIn={setIsLoggedIn} /> : isLoggedIn ? <NavbarSignIn setIsLoggedIn={setIsLoggedIn} /> : <NavbarNotSignIn />}
         <Routes>
-          <Route path='/' element={<SignIn/>}></Route>
+          <Route path='/login' element={<SignIn/>}></Route>
           <Route path='/register' element={<SignUp/>}></Route>
-          <Route path="/Course" element={<MainCourse />} />
+          <Route path="/" element={<MainCourse />} />
           <Route path='/createCourse' element={userRole === 'admin' ? <CreateCourse /> : <MainCourse />} />
           <Route path='/createLesson' element={userRole === 'admin' ? <CreateLesson /> : <MainCourse />} />
           <Route path='/showCourse' element={userRole === 'admin' ? <ShowCourseAdmin /> : <MainCourse />} />

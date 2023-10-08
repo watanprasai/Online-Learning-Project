@@ -14,7 +14,7 @@ function NavbarNotSignIn() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" style={{ background: '#272829' }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between'}}>
-          <Link to="/Course">
+          <Link to="/">
             <IconButton sx={{ mr: 2 }}>
               <SchoolIcon style={{ color: '#FF5733' }} />
             </IconButton>
@@ -22,7 +22,7 @@ function NavbarNotSignIn() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Online Learning
           </Typography>
-          <Button component={Link} to="/" color="inherit" variant="outlined">
+          <Button component={Link} to="/login" color="inherit" variant="outlined">
             Login
           </Button>
         </Toolbar>
