@@ -230,43 +230,44 @@ app.post('/options', authMiddleware, async (req, res) => {
     }
 });
 
-// Update Quiz
-app.post('/updateQuiz', authMiddleware, async (req, res) => {
+// Update Option
+app.put('/option/:id',authMiddleware,async (req,res) => {
     try {
-        const { _id, question, options, correctOption , lessonId } = req.body;
-
-        if (!_id) {
-            const newQuiz = new Quiz({
-                question,
-                options,
-                correctOption,
-                lesson: lessonId,
-            });
-            await newQuiz.save();
-    
-            await Lesson.findByIdAndUpdate(lessonId, { $push: { quizzes: newQuiz._id }});
-    
-            return res.status(201).json(newQuiz);
+        const optionId = req.params.id;
+        const {option} = req.body;
+        const updateOption = await Option.findByIdAndUpdate(optionId, {
+            option,
+        });
+        if (!updateOption) {
+            return res.status(404).json({ error: 'Option not found' });
         }
-        else {
-            const updatedQuiz = await Quiz.findByIdAndUpdate(
-                _id,
-                {
-                    question: question,
-                    options: options,
-                    correctOption: correctOption,
-                },
-                { new: true }
-            );
-            if (!updatedQuiz) {
-                return res.status(404).json({ error: 'ไม่พบควิซที่ต้องการอัปเดต' });
-            }
-            res.status(200).json({ message: 'อัปเดตควิซสำเร็จ' });
-        }
+        res.status(200).json("update Option Succesfully");
     } catch (error) {
-        res.status(500).json({ error: 'ไม่สามารถอัปเดตควิซ' });
+        res.status(500).json({ error: 'Cannot update option' });
     }
 });
+
+// Update Quiz
+app.put('/quizzes/:quizId', authMiddleware, async (req, res) => {
+    try {
+        const quizId = req.params.quizId;
+        const { question, correctOption } = req.body;
+
+        const updatedQuiz = await Quiz.findByIdAndUpdate(quizId, {
+            question,
+            correctOption,
+        });
+
+        if (!updatedQuiz) {
+            return res.status(404).json({ error: 'Quiz not found' });
+        }
+
+        res.status(200).json("update Quiz Successfully");
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot update quiz' });
+    }
+});
+
 
 app.get('/quizzes/:quizId', authMiddleware, async (req, res) => {
     try {

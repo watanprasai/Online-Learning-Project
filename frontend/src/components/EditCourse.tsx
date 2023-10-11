@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams , useNavigate } from 'react-router-dom';
-import { Course, Lesson, Type, User } from '../interfaces/ICourse';
+import { Course, Lesson, Type, User ,Quiz} from '../interfaces/ICourse';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSave, faPlus , faTrash} from '@fortawesome/free-solid-svg-icons';
@@ -22,83 +22,6 @@ function EditCourse() {
     const _id = localStorage.getItem('_id') || '';
     const token = localStorage.getItem('token') || '';
     const navigate = useNavigate();
-    const [questions, setQuestions] = useState([
-        {
-            _id: '', 
-            question: '',
-            options: ['', '', '',''],
-            correctOption: '',
-            lessonId: '',
-        },
-    ]);
-    
-    const handleQuestionChange = (questionIndex:any, value:any) => {
-        const newQuestions = [...questions];
-        newQuestions[questionIndex].question = value;
-        setQuestions(newQuestions);
-    };
-    
-    const handleOptionChange = (questionIndex:any, optionIndex:any, value:any) => {
-        const newQuestions = [...questions];
-        newQuestions[questionIndex].options[optionIndex] = value;
-        setQuestions(newQuestions);
-    };
-    
-    const handleCorrectOptionChange = (questionIndex:any, value:any) => {
-        const newQuestions = [...questions];
-        newQuestions[questionIndex].correctOption = value;
-        setQuestions(newQuestions);
-    };
-    
-    const handleAddQuestion = (index:any) => {
-        const newQuestions = [...questions];
-        newQuestions.push({
-            _id: '',
-            question: '',
-            options: ['', '', '',''],
-            correctOption: '',
-            lessonId: lessons[index]._id,
-        });
-        setQuestions(newQuestions);
-    };
-    
-    const handleRemoveQuestion = async (questionIndex: any) => {
-        Swal.fire({
-            title: 'คุณแน่ใจหรือไม่?',
-            text: 'คุณต้องการลบคำถามนี้หรือไม่?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'ใช่, ลบคำถาม',
-            cancelButtonText: 'ยกเลิก',
-            reverseButtons: true,
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    const questionId = questions[questionIndex]._id;
-                    const response = await fetch(`http://localhost:8080/quizzes/${questionId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `${token}`,
-                        },
-                    });
-    
-                    if (response.ok) {
-                        const newQuestions = [...questions];
-                        newQuestions.splice(questionIndex, 1);
-                        setQuestions(newQuestions);
-    
-                        Swal.fire('ลบคำถามสำเร็จ', '', 'success');
-                    } else {
-                        Swal.fire('เกิดข้อผิดพลาดในการลบคำถาม', '', 'error');
-                    }
-                } catch (error) {
-                    console.error('เกิดข้อผิดพลาดในการส่งคำขอลบ:', error);
-                    Swal.fire('เกิดข้อผิดพลาดในการส่งคำขอลบคำถาม', '', 'error');
-                }
-            }
-        });
-    };
 
     const handleDeleteCourse = async () => {
         const isConfirmed = await Swal.fire({
@@ -157,18 +80,6 @@ function EditCourse() {
         }
     };
     
-    const handleAddOption = (questionIndex:any) => {
-        const newQuestions = [...questions];
-        newQuestions[questionIndex].options.push('');
-        setQuestions(newQuestions);
-    };
-    
-    const handleRemoveOption = (questionIndex:any, optionIndex:any) => {
-        const newQuestions = [...questions];
-        newQuestions[questionIndex].options.splice(optionIndex, 1);
-        setQuestions(newQuestions);
-    };
-
     const getUserbyID = () => {
         setIsLoading(true);
         const apiUrl = `http://localhost:8080/users/${_id}`;
@@ -390,116 +301,136 @@ function EditCourse() {
         }
     }
 
-    const submitQuizLesson = async () => {
-        setIsLoading(true);
-    
-        const optionIdsPerQuestion: string[][] = [];
-        const correctOptions: string[] = [];
-    
-        const optionsData = questions.flatMap((question) =>
-            question.options.map((option) => ({
-                option,
-                isCorrect: option === question.correctOption,
-            }))
-        );
-    
-        const createOptions = await Promise.all(optionsData.map(async (optionData) => {
-            const response = await fetch('http://localhost:8080/options', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `${token}`,
-                },
-                body: JSON.stringify({ option: optionData.option }),
-            });
-            const result: { _id: string } = await response.json();
-    
-            if (optionData.isCorrect) {
-                correctOptions.push(result._id);
-            }
-            return result._id;
-        }));
+    const editQuestion = (lessonIndex: number, questionIndex: number, updatedQuestionData:any) => {
+        const newLessons = [...lessons];
+        const questionToUpdate = newLessons[lessonIndex].quizzes[questionIndex];
+        
+        questionToUpdate.question = updatedQuestionData.question;
+        questionToUpdate.options = updatedQuestionData.options;
+        questionToUpdate.correctOption = updatedQuestionData.correctOption;
+        
+        setLessons(newLessons);
+    };  
 
-        let currentIndex = 0;
-        for (const question of questions) {
-            const numOptions = question.options.length;
-            const optionIds = createOptions.slice(currentIndex, currentIndex + numOptions);
-            optionIdsPerQuestion.push(optionIds);
-            currentIndex += numOptions;
-        }
+    const addQuestion = (lessonIndex: number) => {
+        const newLessons = [...lessons];
+        const createdAtDate = new Date();
+
+        const newQuestion: Quiz = {
+            _id: '',
+            lesson: lessons[lessonIndex]._id,
+            question: '',
+            options: [{
+                _id: '',
+                option: '',
+                createdAt: createdAtDate,
+                updatedAt: createdAtDate,
+                },
+                {
+                    _id: '',
+                    option: '',
+                    createdAt: createdAtDate,
+                    updatedAt: createdAtDate,
+                },
+                {
+                    _id: '',
+                    option: '',
+                    createdAt: createdAtDate,
+                    updatedAt: createdAtDate,
+                },
+                {
+                    _id: '',
+                    option: '',
+                    createdAt: createdAtDate,
+                    updatedAt: createdAtDate,
+                },
+            ],
+            correctOption: {
+                _id: '',
+                option: '',
+                createdAt: createdAtDate,
+                updatedAt: createdAtDate,
+            },
+            createdAt: createdAtDate,
+            updatedAt: createdAtDate,
+        };
     
-        try {
-            const apiUrlUpdateQuiz = 'http://localhost:8080/updateQuiz';
-            const updatePromises = questions.map((question, index) => {
-                return fetch(apiUrlUpdateQuiz, {
-                    method: 'POST',
+        newLessons[lessonIndex].quizzes.push(newQuestion);
+        setLessons(newLessons);
+    };
+    
+    const addOption = (lessonIndex: number, questionIndex: number) => {
+        const newLessons = [...lessons];
+        const newOption = {
+            _id: '',
+            option: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+    
+        newLessons[lessonIndex].quizzes[questionIndex].options.push(newOption);
+        setLessons(newLessons);
+    };
+    
+    const deleteOption = (lessonIndex: number, questionIndex: number, optionIndex: number) => {
+        const newLessons = [...lessons];
+        newLessons[lessonIndex].quizzes[questionIndex].options.splice(optionIndex, 1);
+        setLessons(newLessons);
+    };
+
+    const deleteQuestion = (lessonIndex: number, questionIndex: number) => {
+        const newLessons = [...lessons];
+        newLessons[lessonIndex].quizzes.splice(questionIndex, 1);
+        setLessons(newLessons);
+    };
+
+    const updateQuiz = async (index:number) => {
+        lessons[index].quizzes.map((quiz) => {
+            quiz.options.map((option) => {
+                const apiUrl = `http://localhost:8080/option/${option._id}`;
+                const optionUpdateOption = {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `${token}`,
                     },
-                    body: JSON.stringify({
-                        _id: question._id,
-                        question: question.question,
-                        options: optionIdsPerQuestion[index],
-                        correctOption: correctOptions[index],
-                        lesson: question.lessonId,
-                    }),
-                });
-            });
-            await Promise.all(updatePromises);
-            console.log('อัปเดตคำถามควิซเสร็จสิ้น');
-            await Swal.fire({
-                title: 'บันทึกแบบทดสอบสำเร็จ',
-                text: 'คำถามควิซได้รับการอัปเดตเรียบร้อยแล้ว',
-                icon: 'success',
-                confirmButtonText: 'ตกลง',
-            });
-    
-            setIsLoading(false);
-        } catch (error) {
-            console.error('เกิดข้อผิดพลาดในการส่งคำถามไปยัง /updateQuiz:', error);
-    
-            await Swal.fire({
-                title: 'เกิดข้อผิดพลาดในการบันทึกแบบทดสอบ',
-                text: 'เกิดข้อผิดพลาดในการส่งข้อมูล',
-                icon: 'error',
-                confirmButtonText: 'รับทราบ',
-            });
-    
-            setIsLoading(false);
-        }
-    };
+                    body: JSON.stringify({option: option.option}),
+                };
+                fetch(apiUrl,optionUpdateOption)
+                .then((res) => res.json())
+                .then((res) => {
+                    console.log(res);
+                })
+            })
+            console.log(quiz.correctOption._id)
+            const apiUrl = `http://localhost:8080/quizzes/${quiz._id}`;
+            const optionQuiz = {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `${token}`,
+                },
+                body: JSON.stringify({
+                    question : quiz.question,
+                    correctOption: quiz.correctOption._id,
+                }),
+            }
+            fetch(apiUrl,optionQuiz)
+            .then((res) => res.json())
+            .then((res) => {
+                console.log(res);
+            })
+        })
+    }
+
+    console.log(lessons);
 
     useEffect(() => {
         getCourse();
         getType();
         getUserbyID();
     }, []);
-
-    useEffect(() => {
-        if (course?.lessons) {
-            const quizLessons = course.lessons.filter((lesson) => lesson.quizzes.length > 0);
-            const quizzes = quizLessons.map((t) => t.quizzes);
-            if (quizzes.length > 0) {
-                setQuestions([]);
-                const newQuestions = quizzes.map((quiz) => {
-                    const inQuestion = quiz.map((info) => {
-                        return {
-                            _id: info._id,
-                            question: info.question,
-                            options: info.options.map((option) => option.option.toString()),
-                            correctOption: info.correctOption.option.toString(),
-                            lessonId: info.lesson,
-                        }
-                    });
-                    return inQuestion;
-                });
-                setQuestions((prevQuestions) => prevQuestions.concat(...newQuestions));
-            }
-        }
-    }, [course]);
-
-    console.log(questions);
+    
     return (
         <div className='edit-course-page'>
             {isLoading ? (
@@ -574,7 +505,7 @@ function EditCourse() {
                     </div>
                     
                     <div className="lessons-list">
-                        <h3>บทเรียน</h3>
+                        <h3>บทเรียน</h3> 
                         <ul>
                             {lessons.map((lesson, index) => (
                                 <li key={lesson._id}>
@@ -594,19 +525,24 @@ function EditCourse() {
                                                         value={lesson.title}
                                                         className='titleBox-quiz'
                                                     />
-                                                    <button onClick={() => handleAddQuestion(index)} className='add-question-button'>
+                                                    <button className='add-question-button' onClick={() => addQuestion(index)}>
                                                         เพิ่มคำถาม <FontAwesomeIcon icon={faPlus} />
                                                     </button>
+
                                                     </div>
-                                                    {questions.map((question, questionIndex) => (
+                                                    {lesson.quizzes.map((question,questionIndex) => (
                                                         <div key={questionIndex} className="quiz-form">
-                                                            <div className="form-group">
+                                                             <div className="form-group">
                                                                 <label htmlFor={`question-${questionIndex}`}>คำถาม:</label>
                                                                 <input
                                                                     type="text"
                                                                     id={`question-${questionIndex}`}
                                                                     value={question.question}
-                                                                    onChange={(e) => handleQuestionChange(questionIndex, e.target.value)}
+                                                                    onChange={(event) => {
+                                                                        const updatedQuestionData = { ...question };
+                                                                        updatedQuestionData.question = event.target.value;
+                                                                        editQuestion(index, questionIndex, updatedQuestionData);
+                                                                      }}
                                                                     className="custom-input"
                                                                 />
                                                             </div>
@@ -616,11 +552,15 @@ function EditCourse() {
                                                                     <input
                                                                         type="text"
                                                                         id={`option-${questionIndex}-${optionIndex}`}
-                                                                        value={option}
-                                                                        onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
+                                                                        value={option.option}
+                                                                        onChange={(event) => {
+                                                                            const updatedQuestionData = { ...question };
+                                                                            updatedQuestionData.options[optionIndex].option = event.target.value;
+                                                                            editQuestion(index, questionIndex, updatedQuestionData);
+                                                                        }}
                                                                         className="custom-input"
                                                                     />
-                                                                    <button onClick={() => handleRemoveOption(questionIndex, optionIndex)} className="custom-button">
+                                                                    <button className="custom-button" onClick={() => deleteOption(index, questionIndex, optionIndex)}>
                                                                         ลบ
                                                                     </button>
                                                                 </div>
@@ -629,36 +569,38 @@ function EditCourse() {
                                                                 <label htmlFor={`correctOption-${questionIndex}`}>ตัวเลือกที่ถูกต้อง:</label>
                                                                 <select
                                                                     id={`correctOption-${questionIndex}`}
-                                                                    value={question.correctOption}
-                                                                    onChange={(e) => handleCorrectOptionChange(questionIndex, e.target.value)}
+                                                                    value={question.correctOption._id}
+                                                                    onChange={(event) => {
+                                                                        const updatedQuestionData = { ...question };
+                                                                        updatedQuestionData.correctOption._id = event.target.value;
+                                                                        editQuestion(index, questionIndex, updatedQuestionData);
+                                                                    }}
                                                                     className="custom-select"
                                                                 >
                                                                     <option value="">เลือกตัวเลือกที่ถูกต้อง</option>
                                                                     {question.options.map((option, optionIndex) => (
-                                                                        <option key={optionIndex} value={option}>
-                                                                            {option}
+                                                                        <option key={optionIndex} value={option._id}>
+                                                                            {option.option}
                                                                         </option>
                                                                     ))}
                                                                 </select>
                                                             </div>
                                                             <div className="custom-button-line">
-                                                                <button onClick={() => handleAddOption(questionIndex)} className="custom-button-add-option">
+                                                                <button className="custom-button-add-option" onClick={() => addOption(index, questionIndex)}>
                                                                     เพิ่มตัวเลือก
                                                                 </button>
-                                                                <button onClick={() => handleRemoveQuestion(questionIndex)} className="custom-button">
+                                                                <button className="custom-button" onClick={() => deleteQuestion(index, questionIndex)}>
                                                                     ลบคำถาม
                                                                 </button>
                                                             </div>
-                                                            
                                                         </div>
-                                                        
                                                     ))}
-                                                        <div className="course-create-button">
-                                                                <button onClick={submitQuizLesson}>
-                                                                    แก้ไขควิซ <FontAwesomeIcon icon={faSave} />
-                                                                </button>
-                                                        </div>
-                                                    <div className="custom-button-line-save">
+                                                    <div className="course-create-button">
+                                                        <button onClick={() => updateQuiz(index)}>
+                                                            แก้ไขควิซ <FontAwesomeIcon icon={faSave} />
+                                                        </button>
+                                                     </div>
+                                                    <div className="custom-button-line-save"> 
                                                 </div>
                                                 </div>  
                                             </div>

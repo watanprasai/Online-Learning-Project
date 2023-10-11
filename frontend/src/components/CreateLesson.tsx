@@ -161,7 +161,8 @@ function CreateLesson() {
                 </div>
                 <div className="lesson-line">เนื้อหา<input type="text" id='content' name='content' placeholder='กรอกรายละเอียดเนื้อหา' value={content} onChange={(event) => setContent(event.target.value)} /></div>
                 <div className="lesson-line-upload">
-                    Video
+                    Video <br />
+                    ( .mp4 )
                     <input type="file" id='video' name='video' onChange={handleVideoChange} accept="video/*" />
                 </div>
                 <div className="course-create-button">
