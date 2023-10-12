@@ -168,7 +168,7 @@ function SignUp() {
                 });
                 if (responseRegister.ok) {
                     handleVisibility(false);
-                    navigate('/');
+                    navigate('/login');
                     window.location.reload();
                 }
                 else {

@@ -181,6 +181,7 @@ function CourseStudy() {
   const handleSubmit = (event: any) => {
     event.preventDefault();
     console.log(selectedAnswers);
+    console.log(quizData?.length);
     if (Object.keys(selectedAnswers).length !== quizData?.length) {
       Swal.fire({
         icon: 'warning',
@@ -254,6 +255,7 @@ function CourseStudy() {
             .then((res) => {
               console.log(res);
             })
+            setSelectedAnswers({});
             goToNextLesson();
           } else if (result.isDismissed) {
             setIsSubmitted(false);

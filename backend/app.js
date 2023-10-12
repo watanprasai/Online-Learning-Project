@@ -230,7 +230,7 @@ app.post('/options', authMiddleware, async (req, res) => {
     }
 });
 
-// Update Option
+// Update Option with the same option
 app.put('/option/:id',authMiddleware,async (req,res) => {
     try {
         const optionId = req.params.id;
@@ -247,12 +247,65 @@ app.put('/option/:id',authMiddleware,async (req,res) => {
     }
 });
 
+// Delete Option
+app.put('/option/remove/:optionId',authMiddleware,async (req,res) => {
+    try {
+        const optionId = req.params.optionId;
+        await Option.findByIdAndDelete(optionId);
+        await Quiz.findOneAndUpdate({ $pull: { options: optionId }});
+        res.json({ message: 'Option deleted successfully'});
+    } catch (error) {
+        res.status(400).json({ error: 'Cannot delete option' });
+    }
+})
+
+// Update Option with add option
+app.post('/option/add/:quizId',authMiddleware,async (req,res) => {
+    try {
+        const option = req.body.option;
+        const quizId = req.params.quizId;
+        const newOption = new Option({
+            option,
+        });
+
+        await newOption.save();
+        await Quiz.findByIdAndUpdate(quizId, { $push: { options: newOption._id }});
+        res.status(200).json("add Option Succesfully");
+
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot add option' });
+    }
+});
+
+// Update Option with correct option
+app.post('/option/add/correct/:quizId',authMiddleware,async (req,res) => {
+    try {
+        const option = req.body.option;
+        const quizId = req.params.quizId;
+        const newOption = new Option({
+            option,
+        });
+
+        await newOption.save();
+        await Quiz.findByIdAndUpdate(quizId, { $push: { options: newOption._id }});
+        const updatedQuiz = await Quiz.findByIdAndUpdate(quizId, {
+            correctOption: newOption._id,
+        });
+        if (!updatedQuiz) {
+            return res.status(404).json({ error: 'Quiz not found' });
+        }
+        res.status(200).json({res:"add Correct Option Succesfully",_id:newOption._id});
+
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot add option' });
+    }
+});
+
 // Update Quiz
 app.put('/quizzes/:quizId', authMiddleware, async (req, res) => {
     try {
         const quizId = req.params.quizId;
         const { question, correctOption } = req.body;
-
         const updatedQuiz = await Quiz.findByIdAndUpdate(quizId, {
             question,
             correctOption,

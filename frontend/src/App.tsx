@@ -43,12 +43,7 @@ function App() {
       });
     }
   }, []);
-  const greetingCardData = {
-    recipientName: "John Doe",
-    awardingOrganization: "Your Organization",
-    awardDate: "October 1, 2023",
-    message: "Congratulations on your achievement!",
-  };
+
   return (
     <Router>
       <div>

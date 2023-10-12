@@ -19,6 +19,7 @@ function EditCourse() {
     const [lessons, setLessons] = useState<Lesson[]>([]);
     const [videoFile, setVideo] = useState(null);
     const [lessonQuizzes, setLessonQuizzes] = useState<Lesson[]>([]);
+    const [originalLesson , setOriginalLesson] = useState<Lesson[]>([]);
     const _id = localStorage.getItem('_id') || '';
     const token = localStorage.getItem('token') || '';
     const navigate = useNavigate();
@@ -172,12 +173,41 @@ function EditCourse() {
             setDescription(res.description);
             setLessons(res.lessons);
             setLessonQuizzes(res.lessons);
+            
         } else {
             console.log('can not get course');
         }
         setIsLoading(false);
     };
 
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            const apiUrl = `http://localhost:8080/courses/${courseId}`;
+            const option = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+            try {
+                const response = await fetch(apiUrl, option);
+                if (response.ok) {
+                    const res = await response.json();
+                    if (res) {
+                        setOriginalLesson(res.lessons);
+                    }
+                } else {
+                    console.error('พบข้อผิดพลาดในการดึงข้อมูลคอร์ส');
+                }
+            } catch (error) {
+                console.error('พบข้อผิดพลาดในการเรียก API:', error);
+            }
+            setIsLoading(false);
+        };
+        fetchData();
+    }, [courseId]);
+    
     const submit = async () => {
         setIsLoading(true);
         let photoName = course?.url;
@@ -384,46 +414,152 @@ function EditCourse() {
         setLessons(newLessons);
     };
 
+    function compareArray(original:any, updated:any) {
+        const deletedIds = original
+            .filter((originalItem:any) => !updated.some((updatedItem:any) => originalItem._id === updatedItem._id))
+            .map((deletedItem:any) => deletedItem._id);
+        return deletedIds;
+    }
+    
     const updateQuiz = async (index:number) => {
-        lessons[index].quizzes.map((quiz) => {
+        lessons[index].quizzes.map((quiz,quizIndex) => {
             quiz.options.map((option) => {
-                const apiUrl = `http://localhost:8080/option/${option._id}`;
-                const optionUpdateOption = {
+                if (quiz.options.length < originalLesson[index].quizzes[quizIndex].options.length) {
+                    const differences = compareArray(originalLesson[index].quizzes[quizIndex].options, quiz.options);
+                    differences.forEach((optionId:any) => {
+                        const apiUrl = `http://localhost:8080/option/remove/${optionId}`;
+                        const optionUpdateOption = {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `${token}`,
+                            },
+                        };
+                        fetch(apiUrl, optionUpdateOption)
+                            .then((res) => res.json())
+                            .then((res) => {
+                                console.log(res);
+                            });
+                    });
+                }
+                if (option._id != '') {
+                    const apiUrl = `http://localhost:8080/option/${option._id}`;
+                    const optionUpdateOption = {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `${token}`,
+                        },
+                        body: JSON.stringify({option: option.option}),
+                    };
+                    fetch(apiUrl,optionUpdateOption)
+                    .then((res) => res.json())
+                    .then((res) => {
+                        console.log(res);
+                    })
+                } else {
+                    if (option._id == quiz.correctOption._id) {
+                        const apiUrl = `http://localhost:8080/option/add/correct/${quiz._id}`;
+                        const optionUpdateOption = {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `${token}`,
+                            },
+                            body: JSON.stringify({option: option.option}),
+                        };
+                        fetch(apiUrl,optionUpdateOption)
+                        .then((res) => res.json())
+                        .then((res) => {
+                            console.log(res.res);
+                            const newLessons = [...lessons];
+                            const newOption = {
+                                _id: res._id,
+                                option: option.option,
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                            };
+                            const updatedOptions = newLessons[index].quizzes[quizIndex].options.filter(
+                                (opt) => opt._id !== ''
+                            );
+                            newLessons[index].quizzes[quizIndex].options = updatedOptions;
+                            newLessons[index].quizzes[quizIndex].options.push(newOption);
+                            newLessons[index].quizzes[quizIndex].correctOption = newOption;
+                            setLessons(newLessons);
+                        });
+                    } else {
+                        const apiUrl = `http://localhost:8080/option/add/${quiz._id}`;
+                        const optionUpdateOption = {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `${token}`,
+                            },
+                            body: JSON.stringify({option: option.option}),
+                        };
+                        fetch(apiUrl,optionUpdateOption)
+                        .then((res) => res.json())
+                        .then((res) => {
+                            console.log(res);
+                        });
+                    }
+                };
+            });
+            if (quiz.correctOption._id != '') {
+                const apiUrl = `http://localhost:8080/quizzes/${quiz._id}`;
+                const optionQuiz = {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `${token}`,
                     },
-                    body: JSON.stringify({option: option.option}),
-                };
-                fetch(apiUrl,optionUpdateOption)
+                    body: JSON.stringify({
+                        question : quiz.question,
+                        correctOption: quiz.correctOption._id,
+                    }),
+                }
+                fetch(apiUrl,optionQuiz)
                 .then((res) => res.json())
                 .then((res) => {
                     console.log(res);
                 })
-            })
-            console.log(quiz.correctOption._id)
-            const apiUrl = `http://localhost:8080/quizzes/${quiz._id}`;
-            const optionQuiz = {
+            }
+
+            const apiUrl = `http://localhost:8080/lessons/${lessons[index]._id}`;
+            const data = {
+                title: lessons[index].title,
+            };
+            const option = {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `${token}`,
                 },
-                body: JSON.stringify({
-                    question : quiz.question,
-                    correctOption: quiz.correctOption._id,
-                }),
+                body: JSON.stringify(data),
+            };
+        
+            try {
+                const response = fetch(apiUrl, option).then((response) => response.json())
+                .then((response) => {
+                    setIsLoading(false);
+                    Swal.fire({
+                        title: 'แก้ไขแบบทดสอบสำเร็จ',
+                        icon: 'success',
+                        confirmButtonText: 'ตกลง',
+                    }).then((result) => {
+                        window.location.reload();
+                    });
+                })
+            } catch (error) {
+                setIsLoading(false);
+                console.error('Error updating lesson:', error);
+                Swal.fire({
+                    title: 'เกิดข้อผิดพลาดในการแก้ไขบทเรียน',
+                    icon: 'error',
+                    confirmButtonText: 'ตกลง',
+                });
             }
-            fetch(apiUrl,optionQuiz)
-            .then((res) => res.json())
-            .then((res) => {
-                console.log(res);
-            })
         })
     }
-
-    console.log(lessons);
 
     useEffect(() => {
         getCourse();
@@ -523,12 +659,17 @@ function EditCourse() {
                                                         name='lesson-title'
                                                         placeholder='กรอกชื่อบทเรียน'
                                                         value={lesson.title}
+                                                        onChange={(event) => {
+                                                            const newLessons = [...lessons];
+                                                            newLessons[index].title = event.target.value;
+                                                            setLessons(newLessons);
+                                                            console.log(newLessons)
+                                                        }}
                                                         className='titleBox-quiz'
                                                     />
                                                     <button className='add-question-button' onClick={() => addQuestion(index)}>
                                                         เพิ่มคำถาม <FontAwesomeIcon icon={faPlus} />
                                                     </button>
-
                                                     </div>
                                                     {lesson.quizzes.map((question,questionIndex) => (
                                                         <div key={questionIndex} className="quiz-form">
@@ -638,7 +779,7 @@ function EditCourse() {
                                                 </div>
                                             </div>
                                         )}
-                                    </div>
+                                    </div>          
                                 </li>
                             ))}
                         </ul>
