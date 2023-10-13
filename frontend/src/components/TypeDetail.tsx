@@ -127,7 +127,6 @@ function TypeDetail() {
     }
   };
   
-
   const rows = types.map((type) => ({
     id: type._id,
     name: type.name,

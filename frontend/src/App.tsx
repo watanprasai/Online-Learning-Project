@@ -19,6 +19,9 @@ import EditCourse from './components/EditCourse';
 import ShowCourseAdmin from './components/ShowCourseAdmin';
 import GetCertificate from './components/GetCertificate';
 import TypeDetail from './components/TypeDetail';
+import HandleRegister from './components/HandleRegister';
+import SignUpAdmin from './components/SignUpAdmin';
+import AdminReqeust from './components/AdminRequest';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -52,11 +55,14 @@ function App() {
         <Routes>
           <Route path='/login' element={<SignIn/>}></Route>
           <Route path='/register' element={<SignUp/>}></Route>
+          <Route path='/register-as-admin' element={<SignUpAdmin/>}></Route>
           <Route path="/" element={<MainCourse />} />
+          <Route path="/handle-register" element={<HandleRegister />} />
           <Route path='/createCourse' element={userRole === 'admin' ? <CreateCourse /> : <MainCourse />} />
           <Route path='/createLesson' element={userRole === 'admin' ? <CreateLesson /> : <MainCourse />} />
           <Route path='/typesDetail' element={userRole === 'admin' ? <TypeDetail /> : <MainCourse />} />
           <Route path='/showCourse' element={userRole === 'admin' ? <ShowCourseAdmin /> : <MainCourse />} />
+          <Route path='/request-admin' element={userRole === 'admin' ? <AdminReqeust /> : <MainCourse />} />
           <Route path='/editCourse/:courseId' element={userRole === 'admin' ? <EditCourse /> : <MainCourse />} />
           <Route path='/courseDetail/:courseId' element={<CourseDetail/>}></Route>
           <Route path='/courseStudy/:courseId' element={<CourseStudy/>}></Route>

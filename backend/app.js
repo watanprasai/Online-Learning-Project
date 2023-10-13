@@ -94,12 +94,24 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "user"
     },
+    phone: String,
     progress: [{type: mongoose.Schema.Types.ObjectId, ref: 'Progress'}],
     courseEnrolled: [{type: mongoose.Schema.Types.ObjectId, ref: 'Course'}],
     createdAt: {type:Date , default: Date.now},
     updatedAt: {type:Date , default:Date.now},
 });
 const User = mongoose.model('User', userSchema);
+
+const requestAdminSchema = new mongoose.Schema({
+    username: String,
+    email: String,
+    password: String,
+    phone: String,
+    role: String,
+    createdAt: {type:Date , default: Date.now},
+    updatedAt: {type:Date , default:Date.now},
+});
+const RequestAdmin = mongoose.model('RequestAdmin', requestAdminSchema);
 
 const courseSchema = new mongoose.Schema({
     title: {type:String,require:true},
@@ -743,6 +755,95 @@ app.delete('/users/:id', async (req,res) =>{
 });
 
 // Login and Sign Up
+
+// send Request Admin
+app.post('/request-admin',async (req, res) => {
+    try {
+        const { username, email, password , phone , role} = req.body;
+        if (!username) {
+            return res.status(400).json({ error: 'Missing username' });
+        }
+        if (!email) {
+            return res.status(400).json({ error: 'Missing email' });
+        }
+        if (!password) {
+            return res.status(400).json({ error: 'Missing password' });
+        }
+        if (!phone) {
+            return res.status(400).json({ error: 'Missing phone' });
+        }
+        if (!role) {
+            return res.status(400).json({ error: 'Missing role' });
+        }
+        const existingRequest = await RequestAdmin.findOne({ email });
+        if (existingRequest) {
+            return res.status(400).json({ error: 'Request is already sent' });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newRequest = new RequestAdmin({
+            username,
+            email,
+            password:hashedPassword,
+            phone,
+            role,
+        });
+        await newRequest.save();
+        res.status(201).json(newRequest);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot send request' });
+    }
+});
+
+// Get register admin
+app.get('/request-admin',authMiddleware,async(req,res) => {
+    try {
+        const requests = await RequestAdmin.find();
+        res.json(requests);
+    }catch (error){
+        res.status(500).json({ error: 'Cannot retrieve request' });
+    }
+});
+
+// Reject request admin
+app.delete('/request-admin/:requestId',authMiddleware,async(req,res) => {
+    try {
+        const requestId = req.params.requestId;
+        await RequestAdmin.findByIdAndDelete(requestId);
+        res.json({ message: 'Reject request successfully'});
+    }catch (error){
+        res.status(500).json({ error: 'Cannot reject request' });
+    }
+});
+
+// Register Admin
+app.post('/register-as-admin',authMiddleware, async (req, res) => {
+    try {
+        const requestId = req.body.id;
+        const requestAdmin = await RequestAdmin.findById(requestId);
+
+        if (!requestAdmin) {
+            return res.status(404).json({ error: 'Request not found' });
+        }
+
+        const existingUser = await User.findOne({ email:requestAdmin.email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already in use' });
+        }
+
+        const newUser = new User({
+            username: requestAdmin.username,
+            email: requestAdmin.email,
+            password: requestAdmin.password,
+            phone: requestAdmin.phone,
+            role: requestAdmin.role,
+        });
+
+        await newUser.save();
+        res.status(201).json(newUser);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot register user' });
+    }
+});
 
 // Register
 app.post('/register', async (req, res) => {

@@ -385,7 +385,7 @@ function SignIn() {
                     />
                 </div>
                 <div className="signin-button">
-                    <a href="/register">Create account</a>
+                    <a href="/handle-register">Create account</a>
                     <button type="submit" onClick={handleSubmit} >Sign In</button>
                 </div>
                 <div className="forget-password">
