@@ -57,9 +57,13 @@ function ShowCourseAdmin() {
 
   return (
     <div className='show-course-admin-page'>
-      <h2 className='show-course-admin-header'>รายการคอร์ส</h2>
-      <div style={{ height: 400, width: '80%', margin: 'auto'}}>
-        <DataGrid rows={courses} columns={columns} autoPageSize />
+      <div className="show-course-admin-header">
+        <h2>รายการคอร์ส</h2>
+      </div>
+      <div className="show-course-admin-container">
+        <div style={{ height: 400, width: '100%', margin: 'auto'}}>
+          <DataGrid rows={courses} columns={columns} autoPageSize />
+        </div>
       </div>
     </div>
   );

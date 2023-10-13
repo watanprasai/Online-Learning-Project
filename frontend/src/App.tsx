@@ -18,6 +18,7 @@ import NavbarAdmin from './components/NavbarAdmin';
 import EditCourse from './components/EditCourse';
 import ShowCourseAdmin from './components/ShowCourseAdmin';
 import GetCertificate from './components/GetCertificate';
+import TypeDetail from './components/TypeDetail';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -54,6 +55,7 @@ function App() {
           <Route path="/" element={<MainCourse />} />
           <Route path='/createCourse' element={userRole === 'admin' ? <CreateCourse /> : <MainCourse />} />
           <Route path='/createLesson' element={userRole === 'admin' ? <CreateLesson /> : <MainCourse />} />
+          <Route path='/typesDetail' element={userRole === 'admin' ? <TypeDetail /> : <MainCourse />} />
           <Route path='/showCourse' element={userRole === 'admin' ? <ShowCourseAdmin /> : <MainCourse />} />
           <Route path='/editCourse/:courseId' element={userRole === 'admin' ? <EditCourse /> : <MainCourse />} />
           <Route path='/courseDetail/:courseId' element={<CourseDetail/>}></Route>

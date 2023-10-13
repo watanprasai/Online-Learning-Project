@@ -65,7 +65,7 @@ function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
             </Link>
           </IconButton>
           <IconButton>
-            <Link to={`/Course`} style={{ textDecoration: 'none' }}>
+            <Link to={`/`} style={{ textDecoration: 'none' }}>
               <Typography className="navbar-signin-a" variant="body1" style={{ color: '#FF5733', textDecoration: 'none' }}>
                 หน้าแรก
               </Typography>

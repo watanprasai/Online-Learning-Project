@@ -386,7 +386,7 @@ function CreateLesson() {
     }, [])
 
     return (
-        <div className="page2">
+        <div className="page2-lesson">
             <div className='header'>
                 Lesson Create
             </div>

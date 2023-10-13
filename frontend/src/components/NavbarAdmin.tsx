@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import SchoolIcon from "@mui/icons-material/School";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import PersonIcon from "@mui/icons-material/Person";
+import CategoryIcon from '@mui/icons-material/Category';
 import EditIcon from "@mui/icons-material/Edit";
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -56,6 +57,11 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
         handleClose();
     }
 
+    const clickEditType = () => {
+        navigate(`/typesDetail`);
+        handleClose();
+    }
+
     return (
         <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static" style={{ background: '#272829' }}>
@@ -74,6 +80,11 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
                 </Link>
             </IconButton>
             <IconButton>
+                <Link to='/typesDetail' style={{ textDecoration: 'none' }}>
+                    <CategoryIcon style={{ color: '#FF5733' }} />
+                </Link>
+            </IconButton>
+            <IconButton>
                 <Link to='/createCourse'>
                 <AddCircleIcon style={{ color: '#FF5733' }} />
                 </Link>
@@ -86,7 +97,7 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
                 </Link>
             </IconButton>
             <IconButton>
-                <Link to={`/Course`} style={{ textDecoration: 'none' }}>
+                <Link to={`/`} style={{ textDecoration: 'none' }}>
                 <Typography className="navbar-signin-a" variant="body1" style={{ color: '#FF5733', textDecoration: 'none' }}>
                     หน้าแรก
                 </Typography>
@@ -104,6 +115,7 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
                 <MenuItem onClick={clickMyCourses}>คอร์สเรียนของฉัน</MenuItem>
                 <MenuItem onClick={clickCreateCourse}>สร้างคอร์ส</MenuItem>
                 <MenuItem onClick={clickEditCourse}>แก้ไขคอร์ส</MenuItem>
+                <MenuItem onClick={clickEditType}>แก้ไขประเภท</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
             </Toolbar>

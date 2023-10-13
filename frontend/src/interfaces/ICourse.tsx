@@ -15,6 +15,7 @@ export interface User {
     user: User;
     course: Course;
     lesson: Lesson;
+    videoProgress: number;
     quizAnswer: QuizAnswer[];
     createdAt: Date;
     updatedAt: Date;

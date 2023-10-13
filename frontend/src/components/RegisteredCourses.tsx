@@ -153,16 +153,21 @@ const RegisteredCourses = () => {
 
   return (
     <div className='register-course-page'>
-      <h2 className='register-course-header'>รายการคอร์สที่ลงทะเบียน</h2>
-      <Box sx={{ height: 400, width: '80%', margin: 'auto' }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          autoPageSize
-          checkboxSelection
-          disableRowSelectionOnClick
-        />
-      </Box>
+      <div className="register-course-header">
+        <h2 className='register-course-header'>รายการคอร์สที่ลงทะเบียน</h2>
+      </div>
+      <div className="register-course-container">
+        
+        <Box sx={{ height: 400, width: '100%', margin: 'auto' }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            autoPageSize
+            checkboxSelection
+            disableRowSelectionOnClick
+          />
+        </Box>
+      </div>
     </div>
   );
 };

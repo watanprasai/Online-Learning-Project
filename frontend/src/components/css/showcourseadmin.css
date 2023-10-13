@@ -1,13 +1,26 @@
 .show-course-admin-page {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     gap: 30px;
+    padding: 20px;
+    background-color: #D8D9DA;
+    min-height: 91vh;
 }
 
 .show-course-admin-header {
-    margin-top: 30px;
     font-size: 23px;
     text-decoration: underline;
+    margin-top: 20px;
 }
+
+.show-course-admin-container {
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    width: 80%;
+}
+
+  

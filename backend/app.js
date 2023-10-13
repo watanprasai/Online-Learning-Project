@@ -1075,6 +1075,16 @@ app.get('/types', async (req,res) => {
     }
 });
 
+app.delete('/types/:typeId', async (req, res) => {
+    try {
+      const typeId = req.params.typeId;
+      await Type.findByIdAndDelete(typeId);
+      res.json({ message: 'Type deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete type' });
+    }
+});
+
 app.listen(PORT, () => { 
     console.log(`Server is running on port ${PORT}`); 
 });

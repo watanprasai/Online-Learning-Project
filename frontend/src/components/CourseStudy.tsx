@@ -203,7 +203,7 @@ function CourseStudy() {
         title: 'คุณต้องทำแบบทดสอบก่อน',
         text: 'โปรดทำแบบทดสอบก่อนที่คุณจะไปยังบทเรียนถัดไป',
       });
-    }
+    };
   };
   
   const handleVideoLoadedData = (event: any) => {
@@ -386,7 +386,6 @@ function CourseStudy() {
   
   const lessonProgress = () => {
     const nextLesson = currentLesson < lessons.length - 1 ? lessons[currentLesson + 1] : null;
-  
     return (
       <div className="lesson-progress">
         <p>
@@ -403,6 +402,18 @@ function CourseStudy() {
     );
   };
 
+  const CheckVideoProgress = () => {
+    setIsLoading(true);
+    if (progress?.videoProgress) {
+      console.log(progress?.videoProgress);
+      const currentPercentageWatched = progress?.videoProgress;
+      const watchedTimeInSeconds = (currentPercentageWatched / 100) * videoDuration;
+      const newTimerValue = Math.floor(watchedTimeInSeconds);
+      setTimer(newTimerValue);
+    }
+    setIsLoading(false);
+  };
+
   useEffect(() => {
     getCourseDetail();
   }, []);
@@ -410,6 +421,7 @@ function CourseStudy() {
   useEffect(() => {
     if (!isLoading) {
       loadLessonData();
+      CheckVideoProgress();
       if (lessons[currentLesson]) {
         getProgress();
       }
