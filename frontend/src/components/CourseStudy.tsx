@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Course, Quiz } from '../interfaces/ICourse';
+import { Course, Progress, Quiz } from '../interfaces/ICourse';
 import Swal from 'sweetalert2';
 import './css/coursestudy.css';
 
 function CourseStudy() {
+  const [isLoading, setIsLoading] = useState(true);
   const [currentLesson, setCurrentLesson] = useState(0);
   const { courseId } = useParams();
   const [course, setCourse] = useState<Course>();
@@ -19,6 +20,7 @@ function CourseStudy() {
   const [lessonId , setLessonId] = useState();
   const [timer, setTimer] = useState(0);
   const [intervalId, setIntervalId] = useState<null | NodeJS.Timer>(null);
+  const [progress,setProgress] = useState<Progress>();
 
   const startVideoTimer = () => {
     if (!intervalId) {
@@ -44,7 +46,6 @@ function CourseStudy() {
       fetch(apiUrl, option)
         .then((res) => res.json())
         .then((res) => {
-          console.log(Math.round(res.videoProgress));
           const currentPercentageWatched = (timer / videoDuration) * 100;
           if (res.videoProgress > currentPercentageWatched) {
             return
@@ -76,6 +77,7 @@ function CourseStudy() {
   };
   
   const getCourseDetail = () => {
+    setIsLoading(true);
     const apiUrl = `http://localhost:8080/courses/${courseId}`;
     const option = {
       method: 'GET',
@@ -95,9 +97,11 @@ function CourseStudy() {
           setIsEnrolled(userEnrolled);
           if (res.lessons) {
             setLessons(res.lessons);
+            setIsLoading(false);
           }
         } else {
           console.log('Can not get Course');
+          setIsLoading(false);
         }
       });
   };
@@ -108,6 +112,24 @@ function CourseStudy() {
     }
   }
 
+  const getProgress = () => {
+    const apiUrl = `http://localhost:8080/getProgress/${lessons[currentLesson]._id}`;
+    const option = {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `${token}`
+        },
+    };
+    fetch(apiUrl,option)
+    .then((res) => res.json())
+    .then((res) => {
+      if (res) {
+        setProgress(res);
+      }
+    })
+  }
+  
   const getQuizDetail = () => {
     if (lessons[currentLesson]?.quizzes.length > 0) {
       const quizApiUrl = `http://localhost:8080/quizzes-lesson/${lessons[currentLesson]._id}`;
@@ -123,7 +145,6 @@ function CourseStudy() {
         .then((res) => {
           if (res) {
             setQuizData(res);
-            console.log(res);
           } else {
             console.log('Can not get Quiz');
           }
@@ -171,6 +192,18 @@ function CourseStudy() {
         )}
       </div>
     );
+  };
+
+  const checkQuizProgress = () => {
+    if (progress && progress.quizAnswer && progress.quizAnswer.length > 0) {
+      goToNextLesson();
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: 'คุณต้องทำแบบทดสอบก่อน',
+        text: 'โปรดทำแบบทดสอบก่อนที่คุณจะไปยังบทเรียนถัดไป',
+      });
+    }
   };
   
   const handleVideoLoadedData = (event: any) => {
@@ -227,47 +260,68 @@ function CourseStudy() {
         const quizAnswerId = results.map((result) => result.quizAnswerId);
         const correctAnswers = results.filter((result) => result.isCorrect).length;
         const totalQuestions = results.length;
-        Swal.fire({
-          icon: 'success',
-          title: 'คะแนนของคุณ',
-          text: `คุณได้ ${correctAnswers} / ${totalQuestions} คะแนน`,
-          showCancelButton: true,
-          cancelButtonText: 'ทำแบบทดสอบใหม่',
-          confirmButtonText: 'ยืนยัน',
-          reverseButtons: true,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            const apiUrlProgress = 'http://localhost:8080/updateQuizProgress';
-            const optionProgress = {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `${token}`,
-              },
-              body: JSON.stringify({
-                courseId: courseId,
-                lessonId: lessons[currentLesson]._id,
-                quizId: quizAnswerId,
-              }),
-            }
-            fetch(apiUrlProgress,optionProgress)
-            .then((res) => res.json())
-            .then((res) => {
-              console.log(res);
-            })
-            setSelectedAnswers({});
-            goToNextLesson();
-          } else if (result.isDismissed) {
-            setIsSubmitted(false);
-            setSelectedAnswers({});
+        const passingScore = 60;
 
-            const radioInputs = document.querySelectorAll<HTMLInputElement>('input[type="radio"]');
-            radioInputs.forEach((input) => {
-              input.checked = false;
+        if ((correctAnswers / totalQuestions) * 100 >= passingScore) {
+            Swal.fire({
+              icon: 'success',
+              title: 'คะแนนของคุณ',
+              text: `คุณได้ ${correctAnswers} / ${totalQuestions} คะแนน`,
+              showCancelButton: true,
+              cancelButtonText: 'ทำแบบทดสอบใหม่',
+              confirmButtonText: 'ยืนยัน',
+              reverseButtons: true,
+            }).then((result) => {
+              if (result.isConfirmed) {
+                const apiUrlProgress = 'http://localhost:8080/updateQuizProgress';
+                const optionProgress = {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `${token}`,
+                  },
+                  body: JSON.stringify({
+                    courseId: courseId,
+                    lessonId: lessons[currentLesson]._id,
+                    quizId: quizAnswerId,
+                  }),
+                }
+                fetch(apiUrlProgress,optionProgress)
+                .then((res) => res.json())
+                .then((res) => {
+                  console.log(res);
+                })
+                setSelectedAnswers({});
+                goToNextLesson();
+              } else if (result.isDismissed) {
+                setIsSubmitted(false);
+                setSelectedAnswers({});
+    
+                const radioInputs = document.querySelectorAll<HTMLInputElement>('input[type="radio"]');
+                radioInputs.forEach((input) => {
+                  input.checked = false;
+                });
+              }
             });
-          }
-        });
-      
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'คะแนนของคุณ',
+            html: `คุณทำแบบทดสอบได้ไม่ถึง 60%<br/>คุณได้ ${correctAnswers} / ${totalQuestions} คะแนน`,
+            showCancelButton: true,
+            showConfirmButton: false,
+            cancelButtonText: 'ทำแบบทดสอบใหม่',
+            reverseButtons: true,
+          }).then((result) => {
+            if (result.isDismissed) {
+              setSelectedAnswers({});
+              const radioInputs = document.querySelectorAll<HTMLInputElement>('input[type="radio"]');
+                radioInputs.forEach((input) => {
+                  input.checked = false;
+              });
+            }
+          });
+        };
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -354,8 +408,13 @@ function CourseStudy() {
   }, []);
 
   useEffect(() => {
-    loadLessonData();
-  }, [course, isEnrolled, currentLesson]);
+    if (!isLoading) {
+      loadLessonData();
+      if (lessons[currentLesson]) {
+        getProgress();
+      }
+    }
+  }, [course, isEnrolled, currentLesson, isLoading]);
 
   useEffect(() => {
     if (videoRef.current && lessons[currentLesson]?.videoURL) {
@@ -369,43 +428,42 @@ function CourseStudy() {
     getQuizDetail();
   }, [currentLesson, lessons]);
 
-
   return (
     <div className="course-study-container">
-      {lessonProgress()}
-      {isQuizAvailable ? quizForm() : videoForm()}
-      <div className="lesson-controls">
-        <button
-          onClick={goToPreviousLesson}
-          disabled={currentLesson === 0}
-          className="lesson-control-button-study"
-        >
-          บทเรียนก่อนหน้า
-        </button>
-        {!isQuizForm ? (
-          <button
-            onClick={goToNextLesson}
-            disabled={currentLesson === lessons.length - 1}
-            className="lesson-control-button-study"
-          >
-            บทเรียนถัดไป
-          </button>
-        ) : (
-          <button
-            onClick={() => {
-              Swal.fire({
-                icon: 'warning',
-                title: 'คุณต้องทำแบบทดสอบก่อน',
-                text: 'โปรดทำแบบทดสอบก่อนที่คุณจะไปยังบทเรียนถัดไป',
-              });
-            }}
-            disabled={currentLesson === lessons.length - 1}
-            className="lesson-control-button-study"
-          >
-            บทเรียนถัดไป
-          </button>
-        )}
-      </div>
+      {isLoading ? (
+        <div className="loading-spinner"></div>
+      ) : (
+        <React.Fragment>
+          {lessonProgress()}
+          {isQuizAvailable ? quizForm() : videoForm()}
+          <div className="lesson-controls">
+            <button
+              onClick={goToPreviousLesson}
+              disabled={currentLesson === 0}
+              className="lesson-control-button-study"
+            >
+              บทเรียนก่อนหน้า
+            </button>
+            {!isQuizForm ? (
+              <button
+                onClick={goToNextLesson}
+                disabled={currentLesson === lessons.length - 1}
+                className="lesson-control-button-study"
+              >
+                บทเรียนถัดไป
+              </button>
+            ) : (
+              <button
+                onClick={checkQuizProgress}
+                disabled={currentLesson === lessons.length - 1}
+                className="lesson-control-button-study"
+              >
+                บทเรียนถัดไป
+              </button>
+            )}
+          </div>
+        </React.Fragment>
+      )}
     </div>
   );
 }
