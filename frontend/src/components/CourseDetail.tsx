@@ -72,7 +72,7 @@ function CourseDetail() {
                 cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    navigate('/');
+                    navigate('/login');
                 }
             });
         } else {

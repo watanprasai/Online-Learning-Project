@@ -113,8 +113,6 @@ const RegisteredCourses = () => {
       .catch((error) => {
         console.error('มีข้อผิดพลาดในการร้องขอข้อมูล progress:', error);
       });
-  } else {
-    console.log('ไม่มี LessonId ในตารางคอร์สที่ลงทะเบียนของผู้ใช้งาน');
   }
   
   function calculateCourseProgress(progressData:any) {

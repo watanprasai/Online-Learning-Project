@@ -10,6 +10,7 @@ import './css/adminrequest.css'
 function AdminReqeust() {
     const [requests, setRequests] = useState<RequestAdmin[]>([]);
     const token = localStorage.getItem('token') || "";
+    const [loading, setLoading] = useState(true);
 
     const columns: GridColDef[] = [
         { field: 'username', headerName: 'Username', width: 150 },
@@ -68,6 +69,21 @@ function AdminReqeust() {
     
                     const response = await fetch(apiUrl, option);
                     if (response.status === 201) {
+                        setLoading(true);
+                        const sendEmailApiUrl = 'http://localhost:8080/confirmEmail';
+                        const optionSendEmail = {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `${token}`,
+                            },
+                            body: JSON.stringify({ id , isAccepted:true }),
+                        };
+                        const res = await fetch(sendEmailApiUrl,optionSendEmail);
+                        if (res) {
+                            console.log(res);
+                        };
+                        setLoading(false);
                         const apiUrl = `http://localhost:8080/request-admin/${id}`;
                         const option = {
                             method: 'DELETE',
@@ -75,7 +91,7 @@ function AdminReqeust() {
                                 'Content-Type': 'application/json',
                                 Authorization: `${token}`,
                             },
-                        }
+                        };
                         const response = await fetch(apiUrl, option);
                         if (response.status === 200) {
                             await Swal.fire({
@@ -145,6 +161,7 @@ function AdminReqeust() {
           if (response.status === 200) {
             const data = await response.json();
             setRequests(data);
+            setLoading(false);
           } else {
             console.error('Failed to retrieve types');
           }
@@ -155,6 +172,23 @@ function AdminReqeust() {
 
     const deleteRequest = async (id:any) => {
         try {
+            setLoading(true);
+                const sendEmailApiUrl = 'http://localhost:8080/confirmEmail';
+                const optionSendEmail = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `${token}`,
+                    },
+                    body: JSON.stringify({ id , isAccepted:false }),
+                };
+                const res = await fetch(sendEmailApiUrl, optionSendEmail);
+                if (res.status === 200) {
+                    console.log('อีเมลถูกส่งเมื่อคำขอถูกปฎิเสธ');
+                } else {
+                    console.error('Failed to send rejection email');
+                }
+            setLoading(false);
             const apiUrl = `http://localhost:8080/request-admin/${id}`;
             const option = {
                 method: 'DELETE',
@@ -196,20 +230,27 @@ function AdminReqeust() {
     }, []);
 
     return (
-        <div className='request-admin-page'>
-            <div className='request-admin-header'>
-                รายการคำขอเป็นแอดมิน
-            </div>
-            <div className="request-admin-container">
-                <div style={{ height: 400, width: '100%' , margin: 'auto'}}>
-                    <DataGrid
-                        rows={rows}
-                        columns={columns}
-                    />
+        <div>
+            {loading ? (
+                <div className="loading-spinner"></div>
+            ) : (
+                <div className='request-admin-page'>
+                    <div className='request-admin-header'>
+                        รายการคำขอเป็นแอดมิน
+                    </div>
+                    <div className="request-admin-container">
+                        <div style={{ height: 400, width: '100%', margin: 'auto' }}>
+                            <DataGrid
+                                rows={rows}
+                                columns={columns}
+                            />
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
+    
 };
 
 export default AdminReqeust;

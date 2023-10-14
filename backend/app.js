@@ -42,6 +42,28 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+function return_html_confirm_email(isAccepted) {
+    const subject = isAccepted ? "ยืนยันการเป็นแอดมิน" : "คำขอของคุณถูกปฎิเสธ";
+    const confirmationText = isAccepted
+        ? "คำขอของคุณได้รับการยอมรับและคุณได้รับสิทธิ์ในระบบ Online-Learning-with-me แล้ว"
+        : "ขออภัย คำขอของคุณถูกปฏิเสธจากระบบ Online-Learning-with-me";
+
+    const html_template = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${subject}</title>
+        </head>
+        <body>
+            <h1>${subject}</h1>
+            <p>${confirmationText}</p>
+        </body>
+        </html>
+    `;
+
+    return html_template;
+}
+
 function return_html(otpNumber){
     const html_template = `<!DOCTYPE html>
     <html lang="en">
@@ -559,6 +581,35 @@ app.post('/getOTP', async (req,res) => {
         res.status(200).json({status:"ok"});
     }catch {
         res.status(500).json({ error: 'Cannot generate OTP' });
+    }
+});
+
+// Send email confirm
+app.post('/confirmEmail',authMiddleware, async (req, res) => {
+    try {
+        const { id, isAccepted } = req.body;
+        const requestData = await RequestAdmin.findById(id);
+        const mailOptions = {
+            from: 'o.learning.with.me@gmail.com',
+            to: requestData.email,
+            subject: isAccepted
+                ? 'คำขอของคุณได้รับการยอมรับ'
+                : 'คำขอของคุณถูกปฎิเสธ',
+            html: return_html_confirm_email(isAccepted),
+        };
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+                res.status(500).json({ error: 'เกิดข้อผิดพลาดในการส่งอีเมล' });
+            } else {
+                console.log('Email sent: ' + info.response);
+                res.status(200).json({ message: 'ส่งอีเมลสำเร็จ' });
+            }
+        });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: 'เกิดข้อผิดพลาดในการส่งอีเมล' });
     }
 });
 
