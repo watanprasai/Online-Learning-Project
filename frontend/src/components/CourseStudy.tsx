@@ -180,7 +180,7 @@ function CourseStudy() {
               controls
               onLoadedData={handleVideoLoadedData}
               onPlay={startVideoTimer}
-              onPause={stopVideoTimer} 
+              onPause={stopVideoTimer}
             >
               <source
                 src={require(`../files/${lessons[currentLesson].videoURL}`)}
@@ -209,6 +209,9 @@ function CourseStudy() {
   const handleVideoLoadedData = (event: any) => {
     const videoDuration = event.target.duration;
     setVideoDuration(videoDuration);
+    if (videoRef.current) {
+      videoRef.current.currentTime = timer;
+    }
   };
   
   const handleSubmit = (event: any) => {

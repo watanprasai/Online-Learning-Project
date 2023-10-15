@@ -424,6 +424,10 @@ function EditCourse() {
     const updateQuiz = async (index:number) => {
         lessons[index].quizzes.map((quiz,quizIndex) => {
             quiz.options.map((option) => {
+                if (quiz._id == ''){
+                    console.log(quiz)
+                    return
+                }
                 if (quiz.options.length < originalLesson[index].quizzes[quizIndex].options.length) {
                     const differences = compareArray(originalLesson[index].quizzes[quizIndex].options, quiz.options);
                     differences.forEach((optionId:any) => {
@@ -560,6 +564,8 @@ function EditCourse() {
             }
         })
     }
+
+    console.log(lessons);
 
     useEffect(() => {
         getCourse();
