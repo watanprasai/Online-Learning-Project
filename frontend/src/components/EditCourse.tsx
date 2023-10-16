@@ -19,6 +19,7 @@ function EditCourse() {
     const [lessons, setLessons] = useState<Lesson[]>([]);
     const [videoFile, setVideo] = useState(null);
     const [lessonQuizzes, setLessonQuizzes] = useState<Lesson[]>([]);
+    const [isNewQuestionAdded, setIsNewQuestionAdded] = useState(false);
     const [originalLesson , setOriginalLesson] = useState<Lesson[]>([]);
     const _id = localStorage.getItem('_id') || '';
     const token = localStorage.getItem('token') || '';
@@ -331,21 +332,31 @@ function EditCourse() {
         }
     }
 
-    const editQuestion = (lessonIndex: number, questionIndex: number, updatedQuestionData:any) => {
+    const editQuestion = (lessonIndex: number, questionIndex: number, updatedQuestionData: any) => {
         const newLessons = [...lessons];
         const questionToUpdate = newLessons[lessonIndex].quizzes[questionIndex];
-        
+    
         questionToUpdate.question = updatedQuestionData.question;
         questionToUpdate.options = updatedQuestionData.options;
-        questionToUpdate.correctOption = updatedQuestionData.correctOption;
+        const updatedCorrectOption = {
+            _id: updatedQuestionData.options.find((option:any) => option.option === updatedQuestionData.correctOption.option)?._id || '',
+            option: updatedQuestionData.correctOption.option,
+        };
+        
+        questionToUpdate.correctOption = {
+            _id : updatedCorrectOption._id,
+            option: updatedCorrectOption.option,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
         
         setLessons(newLessons);
-    };  
-
+    };
+    
     const addQuestion = (lessonIndex: number) => {
         const newLessons = [...lessons];
         const createdAtDate = new Date();
-
+        setIsNewQuestionAdded(true);
         const newQuestion: Quiz = {
             _id: '',
             lesson: lessons[lessonIndex]._id,
@@ -387,7 +398,107 @@ function EditCourse() {
     
         newLessons[lessonIndex].quizzes.push(newQuestion);
         setLessons(newLessons);
+    }; 
+    
+    const saveNewQuestions = async (lessonIndex:number) => {
+        setIsLoading(true);
+        
+        const addedQuizzes = lessons[lessonIndex].quizzes.filter(currentQuiz => {
+            return !originalLesson[lessonIndex].quizzes.some(originalQuiz => originalQuiz._id === currentQuiz._id);
+        });
+
+        let hasEmptyFields = false;
+
+        try {
+            addedQuizzes.forEach((quiz) => {
+                if (quiz.correctOption.option !== '' && quiz.options.every(option => option.option !== '')) {
+                    hasEmptyFields  = false;
+                } else {
+                    hasEmptyFields  = true;
+                }
+            });
+        } catch (error) {
+            console.error('เกิดข้อผิดพลาด:', error);
+        }
+
+        if (hasEmptyFields) {
+            await Swal.fire({
+                title: 'คำถามไม่สามารถบันทึกได้',
+                text: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+                icon: 'error',
+                confirmButtonText: 'ตกลง'
+            });
+            window.location.reload();
+        } else {
+            try {
+                addedQuizzes.map((quiz) => {
+                    const apiUrl = 'http://localhost:8080/createQuiz';
+                    const optionUrl = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `${token}`,
+                        },
+                        body: JSON.stringify({ question: quiz.question, lessonId: quiz.lesson }),
+                    };
+                    fetch(apiUrl,optionUrl)
+                    .then((res) => res.json())
+                    .then((res) => {
+                        const quizId = res._id;
+                        quiz.options.map((option) => {
+                            const name = option.option;
+                            console.log(name);
+                            const apiUrl = 'http://localhost:8080/options-with-quizId';
+                            const optionUrl = {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: `${token}`,
+                                },
+                                body: JSON.stringify({ option: name , quizId }),
+                            };
+                            fetch(apiUrl,optionUrl)
+                            .then((res) => res.json())
+                            .then((res) => {
+                                if (quiz.correctOption.option == name) {
+                                    const correctOptionId = res._id
+                                    const apiUrl = 'http://localhost:8080/options-add-correct-quizId';
+                                    const optionUrl = {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            Authorization: `${token}`,
+                                        },
+                                        body: JSON.stringify({ correctOptionId , quizId }),
+                                    };
+                                    fetch(apiUrl,optionUrl)
+                                    .then((res) => res.json())
+                                    .then((res) => {
+                                        if (res.message) {
+                                            console.log("ok")
+                                        }
+                                    })
+                                }
+                            });
+                        })
+                    })
+                })
+            } catch (error) {
+                console.error('เกิดข้อผิดพลาด:', error);
+            }
+            await Swal.fire({
+                title: 'สร้างคำถามสำเร็จ',
+                text: 'ทำการเพิ่มคำถามเรียบร้อยแล้ว',
+                icon: 'success',
+                confirmButtonText: 'ตกลง'
+            });
+            window.location.reload();
+        }
+        
+        setIsLoading(false);
+        setIsNewQuestionAdded(false);
     };
+    
     
     const addOption = (lessonIndex: number, questionIndex: number) => {
         const newLessons = [...lessons];
@@ -408,11 +519,50 @@ function EditCourse() {
         setLessons(newLessons);
     };
 
-    const deleteQuestion = (lessonIndex: number, questionIndex: number) => {
-        const newLessons = [...lessons];
-        newLessons[lessonIndex].quizzes.splice(questionIndex, 1);
-        setLessons(newLessons);
-    };
+    const confirmDeleteQuestion = (lessonIndex: number, questionIndex: number) => {
+        Swal.fire({
+            title: 'คุณแน่ใจที่จะลบคำถามนี้?',
+            text: 'คำถามที่ลบจะไม่สามารถกู้คืนได้',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ใช่, ลบคำถาม',
+            cancelButtonText: 'ยกเลิก',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log(lessons[lessonIndex].quizzes[questionIndex]._id)
+                const quizId = lessons[lessonIndex].quizzes[questionIndex]._id;
+                const apiUrl = `http://localhost:8080/quizzes/${quizId}`;
+                const option = {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `${token}`,
+                    },
+                };
+                fetch(apiUrl,option)
+                .then((res) => res.json())
+                .then((res) => {
+                    if (res.message === 'ลบควิซสำเร็จ') {
+                        Swal.fire({
+                            title: 'ลบคำถามสำเร็จ',
+                            text: 'คำถามถูกลบแล้ว',
+                            icon: 'success',
+                            confirmButtonText: 'ตกลง',
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'เกิดข้อผิดพลาดในการลบคำถาม',
+                            text: 'ไม่สามารถลบคำถามได้',
+                            icon: 'error',
+                            confirmButtonText: 'ตกลง',
+                        });
+                    }
+                })
+            }
+        });
+    };  
 
     function compareArray(original:any, updated:any) {
         const deletedIds = original
@@ -424,11 +574,8 @@ function EditCourse() {
     const updateQuiz = async (index:number) => {
         lessons[index].quizzes.map((quiz,quizIndex) => {
             quiz.options.map((option) => {
-                if (quiz._id == ''){
-                    console.log(quiz)
-                    return
-                }
-                if (quiz.options.length < originalLesson[index].quizzes[quizIndex].options.length) {
+                if (quiz.options.length < originalLesson[index].quizzes[quizIndex]?.options.length) {
+                    console.log("ลบ")
                     const differences = compareArray(originalLesson[index].quizzes[quizIndex].options, quiz.options);
                     differences.forEach((optionId:any) => {
                         const apiUrl = `http://localhost:8080/option/remove/${optionId}`;
@@ -447,6 +594,7 @@ function EditCourse() {
                     });
                 }
                 if (option._id != '') {
+                    console.log("อัพเดท Option")
                     const apiUrl = `http://localhost:8080/option/${option._id}`;
                     const optionUpdateOption = {
                         method: 'PUT',
@@ -461,8 +609,10 @@ function EditCourse() {
                     .then((res) => {
                         console.log(res);
                     })
+                    
                 } else {
-                    if (option._id == quiz.correctOption._id) {
+                    if (option.option == quiz.correctOption.option) {
+                        console.log("เพิ่ม Option ที่เป้น CorrectOption");
                         const apiUrl = `http://localhost:8080/option/add/correct/${quiz._id}`;
                         const optionUpdateOption = {
                             method: 'POST',
@@ -492,6 +642,8 @@ function EditCourse() {
                             setLessons(newLessons);
                         });
                     } else {
+                        console.log("เพิ่ม Option")
+                        console.log(lessons)
                         const apiUrl = `http://localhost:8080/option/add/${quiz._id}`;
                         const optionUpdateOption = {
                             method: 'POST',
@@ -510,6 +662,7 @@ function EditCourse() {
                 };
             });
             if (quiz.correctOption._id != '') {
+                console.log("อัพเดท quiz");
                 const apiUrl = `http://localhost:8080/quizzes/${quiz._id}`;
                 const optionQuiz = {
                     method: 'PUT',
@@ -540,7 +693,6 @@ function EditCourse() {
                 },
                 body: JSON.stringify(data),
             };
-        
             try {
                 const response = fetch(apiUrl, option).then((response) => response.json())
                 .then((response) => {
@@ -562,10 +714,8 @@ function EditCourse() {
                     confirmButtonText: 'ตกลง',
                 });
             }
-        })
-    }
-
-    console.log(lessons);
+        });
+    };
 
     useEffect(() => {
         getCourse();
@@ -716,17 +866,17 @@ function EditCourse() {
                                                                 <label htmlFor={`correctOption-${questionIndex}`}>ตัวเลือกที่ถูกต้อง:</label>
                                                                 <select
                                                                     id={`correctOption-${questionIndex}`}
-                                                                    value={question.correctOption._id}
+                                                                    value={question.correctOption.option}
                                                                     onChange={(event) => {
                                                                         const updatedQuestionData = { ...question };
-                                                                        updatedQuestionData.correctOption._id = event.target.value;
+                                                                        updatedQuestionData.correctOption.option = event.target.value;
                                                                         editQuestion(index, questionIndex, updatedQuestionData);
                                                                     }}
                                                                     className="custom-select"
                                                                 >
                                                                     <option value="">เลือกตัวเลือกที่ถูกต้อง</option>
                                                                     {question.options.map((option, optionIndex) => (
-                                                                        <option key={optionIndex} value={option._id}>
+                                                                        <option key={optionIndex} value={option.option}>
                                                                             {option.option}
                                                                         </option>
                                                                     ))}
@@ -736,12 +886,20 @@ function EditCourse() {
                                                                 <button className="custom-button-add-option" onClick={() => addOption(index, questionIndex)}>
                                                                     เพิ่มตัวเลือก
                                                                 </button>
-                                                                <button className="custom-button" onClick={() => deleteQuestion(index, questionIndex)}>
+                                                                <button className="custom-button" onClick={() => confirmDeleteQuestion(index, questionIndex)}>
                                                                     ลบคำถาม
                                                                 </button>
                                                             </div>
                                                         </div>
+                                                        
                                                     ))}
+                                                    {isNewQuestionAdded && (
+                                                        <div className="course-create-button">
+                                                        <button onClick={() => saveNewQuestions(index)}>
+                                                            บันทึกคำถามที่เพิ่ม <FontAwesomeIcon icon={faSave} />
+                                                        </button>
+                                                        </div>
+                                                    )}
                                                     <div className="course-create-button">
                                                         <button onClick={() => updateQuiz(index)}>
                                                             แก้ไขควิซ <FontAwesomeIcon icon={faSave} />

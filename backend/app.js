@@ -161,8 +161,8 @@ const Lesson = mongoose.model('Lesson', lessonSchema);
 
 const quizSchema = new mongoose.Schema({
     question: { type: String, required: true },
-    options: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Option', required: true }],
-    correctOption: { type: mongoose.Schema.Types.ObjectId, ref: 'Option', required: true },
+    options: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Option'}],
+    correctOption: { type: mongoose.Schema.Types.ObjectId, ref: 'Option'},
     lesson : { type: mongoose.Schema.Types.ObjectId, ref: 'Lesson', required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
@@ -247,6 +247,23 @@ app.post('/lessons/:lessonId/quizzes', authMiddleware, async (req, res) => {
     }
 });
 
+// create Quiz but no option
+app.post('/createQuiz', authMiddleware, async (req, res) => {
+    try {
+        const { question , lessonId } = req.body;
+
+        const newQuiz = new Quiz({
+            question,
+            lesson: lessonId,
+        });
+        await newQuiz.save();
+        await Lesson.findByIdAndUpdate(lessonId, { $push: { quizzes: newQuiz._id }});
+        res.status(201).json(newQuiz);
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot create quiz' });
+    }
+});
+
 // Option
 app.post('/options', authMiddleware, async (req, res) => {
     try {
@@ -261,6 +278,36 @@ app.post('/options', authMiddleware, async (req, res) => {
         res.status(201).json({ _id: newOption._id });
     } catch (error) {
         res.status(500).json({ error: 'Cannot create option' });
+    }
+});
+
+// Option and add option to quizId
+app.post('/options-with-quizId', authMiddleware, async (req, res) => {
+    try {
+        const { option , quizId }= req.body;
+
+        const newOption = new Option({
+            option,
+        });
+
+        await newOption.save();
+        await Quiz.findByIdAndUpdate(quizId, { $push: { options: newOption._id }});
+        res.status(201).json({ _id: newOption._id });
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot create option' });
+        console.log(error);
+    }
+});
+
+// add Correct option to quiz
+app.post('/options-add-correct-quizId', authMiddleware, async (req, res) => {
+    try {
+        const { correctOptionId , quizId }= req.body;
+        await Quiz.findByIdAndUpdate(quizId, { $push: { correctOption: correctOptionId }});
+        res.status(201).json({ messaage: "ok"});
+    } catch (error) {
+        res.status(500).json({ error: 'Cannot add corect option' });
+        console.log(error);
     }
 });
 
