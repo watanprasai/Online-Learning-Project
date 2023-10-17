@@ -153,6 +153,7 @@ const lessonSchema = new mongoose.Schema({
     title: String,
     content: String,
     quizzes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Quiz' }],
+    scorePass: String,
     videoURL: String,
     createdAt: {type: Date, default: Date.now},
     updatedAt: {type: Date, default: Date.now},

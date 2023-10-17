@@ -78,7 +78,7 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
                 </IconButton>
             </Link>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                Online Learning
+                Online Learning with me
             </Typography>
             <IconButton>
                 <Link to='/request-admin'>

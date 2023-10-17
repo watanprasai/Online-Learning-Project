@@ -27,9 +27,9 @@ function CertificateCanvas({ courseTitle, studentName }: any) {
 
         context.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
 
-        context.font = 'bold 30px Arial';
+        context.font = 'bold 22px Arial';
         context.fillStyle = 'navy';
-        context.fillText('ใบประกาศนี้สำหรับการสำเร็จการเรียน', 100, 80);
+        context.fillText('ใบประกาศนี้สำหรับนักศึกษาที่เรียนครบ 80% ของเวลาเรียนทั้งหมด', 100, 80);
         
         context.font = '24px Arial';
         context.fillText('เราขอยินดีที่ประกาศว่า', 100, 150);

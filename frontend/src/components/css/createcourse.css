@@ -143,6 +143,25 @@
     white-space: nowrap;
 }
 
+.lesson-line-scorepass {
+    display: flex;
+    align-items: center;
+    padding-left: 40px;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    gap: 20px;
+    overflow: hidden;
+}
+
+.custom-input-scorepass {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 16px;
+}
+
+
 .custom-input,
 select {
     width: 100%;

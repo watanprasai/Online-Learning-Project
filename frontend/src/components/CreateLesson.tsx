@@ -13,17 +13,40 @@ function CreateLesson() {
 
     const [lessonTitle, setLessonTitle] = useState('');
     const [content, setContent] = useState('');
-
+    const [scorePass , setScorePass] = useState('');
     const [videoFile, setVideo] = useState(null);
+    const [photoFile, setPhoto] = useState(null);
+    const [questionType, setQuestionType] = useState("text");
 
     const [questions, setQuestions] = useState([
         {
             question: '',
-            options: ['', '', '',''],
+            options: [
+                {
+                    text: '',
+                    photo: null,
+                },
+                {
+                    text: '',
+                    photo: null,
+                },
+                {
+                    text: '',
+                    photo: null,
+                },
+                {
+                    text: '',
+                    photo: null,
+                },
+            ],
             correctOption: '',
         },
     ]);
 
+    const handleSavePhotoQuestions = async () => {
+        console.log(photoFile);
+    }
+    console.log(questions)
     const handleSaveQuestions = async () => {
         try {
             console.log(lessonTitle)
@@ -41,7 +64,7 @@ function CreateLesson() {
                     'Content-Type': 'application/json',
                     Authorization: `${token}`,
                 },
-                body: JSON.stringify({ title: lessonTitle, course: courseID }),
+                body: JSON.stringify({ title: lessonTitle, course: courseID , scorePass: scorePass}),
             });
             const quizResult: { _id: string; error?: string } = await quizResponse.json();
             const lessonId = quizResult._id;
@@ -54,11 +77,11 @@ function CreateLesson() {
 
             const optionsData = questions.flatMap((question) =>
                 question.options.map((option) => ({
-                    option,
-                    isCorrect: option === question.correctOption,
+                    option:option.text,
+                    isCorrect: option.text === question.correctOption,
                 }))
             );
-
+            
             const createOptions = await Promise.all(optionsData.map(async (optionData) => {
                 const response = await fetch('http://localhost:8080/options', {
                     method: 'POST',
@@ -113,10 +136,28 @@ function CreateLesson() {
             setQuestions([
                 {
                     question: '',
-                    options: ['', '', '',''],
+                    options: [
+                        {
+                            text: '',
+                            photo: null,
+                        },
+                        {
+                            text: '',
+                            photo: null,
+                        },
+                        {
+                            text: '',
+                            photo: null,
+                        },
+                        {
+                            text: '',
+                            photo: null,
+                        },
+                    ],
                     correctOption: '',
                 },
             ]);
+            
     
             await Swal.fire({
                 title: 'สร้าง Quiz สำเร็จ',
@@ -171,12 +212,25 @@ function CreateLesson() {
             </div>
         )
     }
+
+    const handlePhotoChange = (event: any, questionIndex:any, optionIndex:any) => {
+        const selectedPhoto = event.target.files[0];
+        const updatedQuestions = [...questions];
+    
+        if (questionIndex >= 0 && questionIndex < updatedQuestions.length) {
+            const question = updatedQuestions[questionIndex];
+            if (optionIndex >= 0 && optionIndex < question.options.length) {
+                question.options[optionIndex].photo = selectedPhoto;
+                setQuestions(updatedQuestions);
+            }
+        }
+    }
     
 
     const createQuizForm = () => {
         const areOptionsEmpty = questions.some((question) =>
             question.question.trim() === '' ||
-            question.options.some((option) => option.trim() === '') ||
+            question.options.some((option) => option.text.trim() === '') ||
             question.correctOption.trim() === ''
         );
         return (
@@ -196,6 +250,38 @@ function CreateLesson() {
                     เพิ่มคำถาม <FontAwesomeIcon icon={faPlus} />
                 </button>
                 </div>
+                <div className="lesson-line-scorepass">
+                    <label>เกณฑ์<br/>การผ่าน (%):</label>
+                    <input
+                        type="number"
+                        value={scorePass}
+                        onChange={(e) => setScorePass(e.target.value)}
+                        className="custom-input-scorepass"
+                    /> 
+                </div>
+                {/* <div className="question-type-selection">
+                    <label>
+                        <input
+                            type="radio"
+                            name="questionType"
+                            value="text"
+                            checked={questionType === "text"}
+                            onChange={() => setQuestionType("text")}
+                        />
+                        Text
+                    </label>
+                    <label>
+                        <input
+                            type="radio"
+                            name="questionType"
+                            value="photo"
+                            checked={questionType === "photo"}
+                            onChange={() => setQuestionType("photo")}
+                        />
+                        Photo
+                    </label>
+                </div> */}
+
                 {questions.map((question, questionIndex) => (
                     <div key={questionIndex} className="quiz-form">
                         <div className="form-group">
@@ -209,56 +295,98 @@ function CreateLesson() {
                             />
                         </div>
                         {question.options.map((option, optionIndex) => (
-                            <div className="form-group-choice" key={optionIndex}>
-                                <label htmlFor={`option-${questionIndex}-${optionIndex}`}>{`ตัวเลือก ${optionIndex + 1}:`}</label>
-                                <input
-                                    type="text"
-                                    id={`option-${questionIndex}-${optionIndex}`}
-                                    value={option}
-                                    onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
-                                    className="custom-input"
-                                />
-                                <button onClick={() => handleRemoveOption(questionIndex, optionIndex)} className="custom-button">
-                                    ลบ
-                                </button>
+                            <div>
+                                {questionType === "text" ? (
+                                    <div className="form-group-choice" key={optionIndex}>
+                                        <label htmlFor={`option-${questionIndex}-${optionIndex}`}>{`ตัวเลือก ${optionIndex + 1}:`}</label>
+                                        <input
+                                            type="text"
+                                            id={`option-${questionIndex}-${optionIndex}`}
+                                            value={option.text}
+                                            onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
+                                            className="custom-input"
+                                        />
+                                        <button onClick={() => handleRemoveOption(questionIndex, optionIndex)} className="custom-button">
+                                            ลบ
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <label htmlFor={`image-option-${questionIndex}-${optionIndex}`}>{`อัปโหลดรูปภาพ ${optionIndex + 1}:`}</label>
+                                        <input
+                                            type="file"
+                                            id={`image-option-${questionIndex}-${optionIndex}`}
+                                            accept="image/*"
+                                            onChange={(e) => handlePhotoChange(e, questionIndex, optionIndex)}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         ))}
-                        <div className="form-group">
-                            <label htmlFor={`correctOption-${questionIndex}`}>ตัวเลือกที่ถูกต้อง:</label>
-                            <select
-                                id={`correctOption-${questionIndex}`}
-                                value={question.correctOption}
-                                onChange={(e) => handleCorrectOptionChange(questionIndex, e.target.value)}
-                                className="custom-select"
-                            >
-                                <option value="">เลือกตัวเลือกที่ถูกต้อง</option>
-                                {question.options.map((option, optionIndex) => (
-                                    <option key={optionIndex} value={option}>
-                                        {option}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="custom-button-line">
-                            <button onClick={() => handleAddOption(questionIndex)} className="custom-button-add-option">
-                                เพิ่มตัวเลือก
-                            </button>
-                            <button onClick={() => handleRemoveQuestion(questionIndex)} className="custom-button">
-                                ลบคำถาม
-                            </button>
-                        </div>
+                        {questionType === "text" ? (
+                            <div>
+                                <div className="form-group">
+                                    <label htmlFor={`correctOption-${questionIndex}`}>ตัวเลือกที่ถูกต้อง:</label>
+                                    <select
+                                        id={`correctOption-${questionIndex}`}
+                                        value={question.correctOption}
+                                        onChange={(e) => handleCorrectOptionChange(questionIndex, e.target.value)}
+                                        className="custom-select"
+                                    >
+                                        <option value="">เลือกตัวเลือกที่ถูกต้อง</option>
+                                        {question.options.map((option, optionIndex) => (
+                                            <option key={optionIndex} value={option.text}>
+                                                {option.text}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="custom-button-line">
+                                    <button onClick={() => handleAddOption(questionIndex)} className="custom-button-add-option">
+                                        เพิ่มตัวเลือก
+                                    </button>
+                                    <button onClick={() => handleRemoveQuestion(questionIndex)} className="custom-button">
+                                        ลบคำถาม
+                                    </button>
+                                </div>
+                            </div>
+                        ): (
+                            <div>
+                                <label htmlFor={`correctOption-${questionIndex}`}>ตัวเลือกที่ถูกต้อง:</label>
+                                <select
+                                    id={`correctOption-${questionIndex}`}
+                                    value={question.correctOption}
+                                    onChange={(e) => handleCorrectOptionChange(questionIndex, e.target.value)}
+                                    className="custom-select"
+                                >
+                                    <option value="">เลือกตัวเลือกที่ถูกต้อง</option>
+                                    {question.options.map((option, optionIndex) => (
+                                        <option key={optionIndex} value={option.text}>
+                                            {option.text}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                        
                     </div>
                 ))}
                 <div className="custom-button-line-save">
                 <button onClick={() => {
-                    if (areOptionsEmpty) {
+                    // if (areOptionsEmpty) {
+                    if (false) {
                         Swal.fire({
                             title: 'กรุณากรอกตัวเลือกที่ถูกต้องสำหรับทุกคำถาม',
                             icon: 'warning',
                             confirmButtonText: 'ตกลง',
                         });
                     } else {
-                        handleSaveQuestions();
+                        if (questionType == "text") {
+                            handleSaveQuestions();
+                        } else {
+                            handleSavePhotoQuestions();
+                        }
+                        
                     }
                 }} className="custom-button-save-option">
                     บันทึกคำถาม
@@ -349,7 +477,7 @@ function CreateLesson() {
 
     const handleOptionChange = (questionIndex: number, optionIndex: number, value: string) => {
         const updatedQuestions = [...questions];
-        updatedQuestions[questionIndex].options[optionIndex] = value;
+        updatedQuestions[questionIndex].options[optionIndex].text = value;
         setQuestions(updatedQuestions);
     };
 
@@ -359,11 +487,21 @@ function CreateLesson() {
         setQuestions(updatedQuestions);
     };
 
+    const handleCorrectPhotoOptionChange = (questionIndex:any, selectedPhoto:any) => {
+        const updatedQuestions = [...questions];
+    
+        if (questionIndex >= 0 && questionIndex < updatedQuestions.length) {
+            updatedQuestions[questionIndex].correctOption = selectedPhoto.target.files[0];
+            setQuestions(updatedQuestions);
+        }
+    };
+    
+
     const handleAddOption = (questionIndex: number) => {
         const updatedQuestions = [...questions];
-        updatedQuestions[questionIndex].options.push('');
+        updatedQuestions[questionIndex].options.push({ text: '', photo: null });
         setQuestions(updatedQuestions);
-    };
+    };    
 
     const handleRemoveOption = (questionIndex: number, optionIndex: number) => {
         const updatedQuestions = [...questions];
@@ -372,7 +510,24 @@ function CreateLesson() {
     };
 
     const handleAddQuestion = () => {
-        setQuestions([...questions, { question: '', options: ['', '', ''], correctOption: '' }]);
+        setQuestions([...questions, { question: '', options: [
+            {
+                text: '',
+                photo: null,
+            },
+            {
+                text: '',
+                photo: null,
+            },
+            {
+                text: '',
+                photo: null,
+            },
+            {
+                text: '',
+                photo: null,
+            },
+        ], correctOption: '' }]);
     };
 
     const handleRemoveQuestion = (index: number) => {
@@ -393,25 +548,25 @@ function CreateLesson() {
             <div className="course-create-container">
                 <div className='course-line'>
                     หัวข้อ
-                    <input type="text" id='title' name='title' placeholder='กรอกหัวข้อ' value={course?.title} />
+                    <input type="text" id='title' name='title' placeholder='กรอกหัวข้อ' value={course?.title} disabled={true}  />
                 </div>
                 <div className='course-line'>
                     คำอธิบาย
-                    <input type="text" id="description" name='description' placeholder='กรอกคำอธิบาย' value={course?.description} />
+                    <input type="text" id="description" name='description' placeholder='กรอกคำอธิบาย' value={course?.description} disabled={true}  />
                 </div>
                 <div className='course-line'>
                     ครูผู้สอน
-                    <input type="text" id='instructor' name='instructor' placeholder='กรอกชื่อครูผู้สอน' value={course?.instructor.username} />
+                    <input type="text" id='instructor' name='instructor' placeholder='กรอกชื่อครูผู้สอน' value={course?.instructor.username} disabled={true}  />
                 </div>
                 <div className='course-line'>
                     หมวดหมู่
-                    <select name="types" id="types" >
-                        <option value="">{course?.type.name}</option>
+                    <select name="types" id="types" disabled={true}>
+                        <option value="" >{course?.type.name}</option>
                     </select>
                 </div>
                 <div className='course-line'>
                     รูปปก
-                    <input type="text" id='url' name='url' placeholder='กรอก url รูปหน้าปก' value={course?.url} />
+                    <input type="text" id='url' name='url' placeholder='กรอก url รูปหน้าปก' value={course?.url} disabled={true}  />
                 </div>
                 <hr className="line-divider" />
                 <div className="lesson-line">

@@ -263,7 +263,7 @@ function CourseStudy() {
         const quizAnswerId = results.map((result) => result.quizAnswerId);
         const correctAnswers = results.filter((result) => result.isCorrect).length;
         const totalQuestions = results.length;
-        const passingScore = 60;
+        const passingScore = lessons[currentLesson].scorePass;
 
         if ((correctAnswers / totalQuestions) * 100 >= passingScore) {
             Swal.fire({
@@ -310,7 +310,7 @@ function CourseStudy() {
           Swal.fire({
             icon: 'warning',
             title: 'คะแนนของคุณ',
-            html: `คุณทำแบบทดสอบได้ไม่ถึง 60%<br/>คุณได้ ${correctAnswers} / ${totalQuestions} คะแนน`,
+            html: `คุณทำแบบทดสอบได้ไม่ถึง ${lessons[currentLesson].scorePass}%<br/>คุณได้ ${correctAnswers} / ${totalQuestions} คะแนน`,
             showCancelButton: true,
             showConfirmButton: false,
             cancelButtonText: 'ทำแบบทดสอบใหม่',
