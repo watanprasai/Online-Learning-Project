@@ -607,7 +607,7 @@ app.post('/getOTP', async (req,res) => {
         });
         const existingEmail = await User.findOne({ email });
         if (existingEmail) {
-            return res.status(400).json({ error: 'Email already in use' });
+            return res.status(400).json({ error: 'อีเมลถูกใช้งานแล้ว' });
         }
         await otpData.save();
 

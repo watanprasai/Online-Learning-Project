@@ -23,6 +23,19 @@ function SignUpAdmin() {
 
     const [visible, setVisible] = useState(false);
 
+    const isEmailValid = (email:any) => {
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        return emailRegex.test(email);
+    };
+
+    const isNameValid = (name:any) => {
+        return name.length >= 3 && name.includes(' ');
+    }
+
+    const isPhoneValid = (phone:any) => {
+        return /^[0][0-9]{9}$/.test(phone);
+    }
+
     const handleVisibility = (state: boolean) => {
         setVisible(state);
     };
@@ -98,6 +111,42 @@ function SignUpAdmin() {
     };
 
     const generateOTP = async() => {
+        if (!username || !email || !password) {
+            Swal.fire({
+                title: 'ข้อมูลไม่ครบ',
+                text: 'โปรดกรอกข้อมูลให้ครบถ้วน',
+                icon: 'warning',
+                confirmButtonText: 'รับทราบ'
+            });
+            return;
+        }
+        if (!isNameValid(username)) {
+            Swal.fire({
+                title: 'ชื่อไม่ถูกต้อง',
+                text: 'โปรดป้อนชื่อที่ถูกต้อง',
+                icon: 'warning',
+                confirmButtonText: 'รับทราบ'
+            });
+            return;
+        }
+        if (!isPhoneValid(phone)) {
+            Swal.fire({
+                title: 'เบอร์โทรศัพท์ไม่ถูกต้อง',
+                text: 'โปรดป้อนเบอร์โทรศัพท์ที่ถูกต้อง',
+                icon: 'warning',
+                confirmButtonText: 'รับทราบ'
+            });
+            return;
+        }
+        if (!isEmailValid(email)) {
+            Swal.fire({
+                title: 'อีเมลไม่ถูกต้อง',
+                text: 'โปรดป้อนอีเมลที่ถูกต้อง',
+                icon: 'warning',
+                confirmButtonText: 'รับทราบ'
+            });
+            return;
+        }
         if (password !== confirmPassword) {
             Swal.fire({
                 title: 'รหัสผ่านไม่ตรงกัน',
@@ -130,8 +179,8 @@ function SignUpAdmin() {
                 });
             } else {
                 Swal.fire({
-                    title: 'ส่งรหัส OTP ไม่สำเร็จ',
-                    text: 'กรุณากรอกข้อมูลให้ถูกต้อง',
+                    title: 'ลงทะเบียนไม่สำเร็จ',
+                    text: data.error,
                     icon: 'error',
                     confirmButtonText: 'รับทราบ'
                 });
@@ -211,7 +260,7 @@ function SignUpAdmin() {
             <div className="signup-admin-container">
                 <label className='signup'>Admin Sign Up</label>
                 <div>
-                    <TextField id="username" label="Enter your username" variant="outlined" value={username} onChange={(event) => setUsername(event.target.value)} sx={{width: "350px"}}/>
+                    <TextField id="username" label="Enter your name" variant="outlined" value={username} onChange={(event) => setUsername(event.target.value)} sx={{width: "350px"}}/>
                 </div>
                 <div>
                     <TextField

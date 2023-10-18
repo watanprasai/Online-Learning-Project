@@ -17,12 +17,22 @@ function SignUp() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [visible, setVisible] = useState(false);
 
     const handleVisibility = (state: boolean) => {
         setVisible(state);
     };
+
+    const isEmailValid = (email:any) => {
+        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        return emailRegex.test(email);
+    };
+
+    const isNameValid = (name:any) => {
+        return name.length >= 3 && name.includes(' ');
+    }
+    
 
     const [otp, setOtp] = useState<string[]>(["", "", "", "", ""]);
     const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -95,6 +105,42 @@ function SignUp() {
     };
 
     const generateOTP = async() => {
+        if (!username || !email || !password) {
+            Swal.fire({
+                title: 'ข้อมูลไม่ครบ',
+                text: 'โปรดกรอกข้อมูลให้ครบถ้วน',
+                icon: 'warning',
+                confirmButtonText: 'รับทราบ'
+            });
+            return;
+        }
+        if (!isNameValid(username)) {
+            Swal.fire({
+                title: 'ชื่อไม่ถูกต้อง',
+                text: 'โปรดป้อนชื่อที่ถูกต้อง',
+                icon: 'warning',
+                confirmButtonText: 'รับทราบ'
+            });
+            return;
+        }
+        if (!isEmailValid(email)) {
+            Swal.fire({
+                title: 'อีเมลไม่ถูกต้อง',
+                text: 'โปรดป้อนอีเมลที่ถูกต้อง',
+                icon: 'warning',
+                confirmButtonText: 'รับทราบ'
+            });
+            return;
+        }
+        if (password !== confirmPassword) {
+            Swal.fire({
+                title: 'รหัสผ่านไม่ตรงกัน',
+                text: 'โปรดตรวจสอบรหัสผ่านและรหัสผ่านยืนยันอีกครั้ง',
+                icon: 'warning',
+                confirmButtonText: 'รับทราบ'
+            });
+            return;
+        };
         try {
             let info = {
                 "email" : email
@@ -118,8 +164,8 @@ function SignUp() {
                 });
             } else {
                 Swal.fire({
-                    title: 'ส่งรหัส OTP ไม่สำเร็จ',
-                    text: 'กรุณากรอกข้อมูลให้ถูกต้อง',
+                    title: 'ลงทะเบียนไม่สำเร็จ',
+                    text: data.error,
                     icon: 'error',
                     confirmButtonText: 'รับทราบ'
                 });
@@ -198,7 +244,7 @@ function SignUp() {
             <div className="signup-container">
                 <label className='signup'>Sign Up</label>
                 <div>
-                    <TextField id="username" label="Enter your username" variant="outlined" value={username} onChange={(event) => setUsername(event.target.value)} sx={{width: "350px"}}/>
+                    <TextField id="username" label="Enter your name" variant="outlined" value={username} onChange={(event) => setUsername(event.target.value)} sx={{width: "350px"}}/>
                 </div>
                 <div>
                     <TextField id="email" label="Enter your email" variant="outlined" value={email} onChange={(event) => setEmail(event.target.value)} sx={{width: "350px"}}/>
@@ -210,6 +256,30 @@ function SignUp() {
                         variant="outlined"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
+                        type={showPassword ? 'text' : 'password'}
+                        sx={{ width: "350px" }}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}
+                    />
+                </div>
+                <div>
+                    <TextField
+                        id="confirmPassword"
+                        label="Confirm Password"
+                        variant="outlined"
+                        value={confirmPassword}
+                        onChange={(event) => setConfirmPassword(event.target.value)}
                         type={showPassword ? 'text' : 'password'}
                         sx={{ width: "350px" }}
                         InputProps={{
