@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => void }) {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState("");
   const _id = localStorage.getItem('_id') || "";
   const token = localStorage.getItem('token') || '';
   const handleLogout = () => {
@@ -45,6 +46,23 @@ function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
     handleClose();
   }
 
+  useEffect(() => {
+    fetch(`http://localhost:8080/getuser`, {
+        method: 'GET',
+        headers: {
+          Authorization: `${token}`
+        }
+    })
+    .then(response => response.json())
+      .then(data => {
+        console.log(data)
+        setUserName(data.username)
+      })
+      .catch(error => {
+        console.error('Error fetching user data:', error);
+      });
+  }, []);
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" style={{ background: '#272829' }}>
@@ -71,6 +89,7 @@ function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
               </Typography>
             </Link>
           </IconButton>
+          <Typography style={{ color: '#FF5733'}}>{userName}</Typography>
           <IconButton onClick={handleProfileClick}>
             <PersonIcon style={{ color: '#FF5733' }} />
           </IconButton>

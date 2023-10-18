@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -17,6 +17,8 @@ import { useNavigate } from "react-router-dom";
 
 function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => void }) {
     const navigate = useNavigate();
+    const [userRole, setUserRole] = useState("");
+    const [userName, setUserName] = useState("");
     const _id = localStorage.getItem('_id') || "";
     const token = localStorage.getItem('token') || '';
     const handleLogout = () => {
@@ -68,6 +70,38 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
         handleClose();
     };
 
+    useEffect(() => {
+        if (token) {
+          fetch('http://localhost:8080/secure-route', {
+            method: 'GET',
+            headers: {
+              Authorization: `${token}`
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            setUserRole(data.role);
+          })
+          .catch(error => {
+            console.error('Error fetching user role:', error);
+          });
+        }
+        fetch(`http://localhost:8080/getuser`, {
+            method: 'GET',
+            headers: {
+              Authorization: `${token}`
+            }
+        })
+        .then(response => response.json())
+          .then(data => {
+            console.log(data)
+            setUserName(data.username)
+          })
+          .catch(error => {
+            console.error('Error fetching user data:', error);
+          });
+      }, []);
+
     return (
         <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static" style={{ background: '#272829' }}>
@@ -80,11 +114,13 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                 Online Learning with me
             </Typography>
-            <IconButton>
-                <Link to='/request-admin'>
+            {userRole === 'admin-root' && (
+                <IconButton>
+                    <Link to='/request-admin'>
                     <EmojiPeopleIcon style={{ color: '#FF5733' }} />
-                </Link>
-            </IconButton>
+                    </Link>
+                </IconButton>
+            )}
             <IconButton>
                 <Link to='/showCourse'>
                     <EditIcon style={{ color: '#FF5733' }} />
@@ -114,6 +150,7 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
                 </Typography>
                 </Link>
             </IconButton>
+            <Typography style={{ color: '#FF5733'}}>{userName}</Typography>
             <IconButton onClick={handleProfileClick}>
                 <PersonIcon style={{ color: '#FF5733' }} />
             </IconButton>
@@ -123,7 +160,9 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
                 onClose={handleClose}
             >
                 <MenuItem onClick={clickEditProfile}>ข้อมูลส่วนตัว</MenuItem>
-                <MenuItem onClick={clickHandleRequest}>รายการคำขอ</MenuItem>
+                {userRole === 'admin-root' && (
+                    <MenuItem onClick={clickHandleRequest}>รายการคำขอ</MenuItem>
+                )}
                 <MenuItem onClick={clickMyCourses}>คอร์สเรียนของฉัน</MenuItem>
                 <MenuItem onClick={clickCreateCourse}>สร้างคอร์ส</MenuItem>
                 <MenuItem onClick={clickEditCourse}>แก้ไขคอร์ส</MenuItem>

@@ -51,19 +51,19 @@ function App() {
   return (
     <Router>
       <div>
-      {isLoggedIn && userRole === 'admin' ? <NavbarAdmin setIsLoggedIn={setIsLoggedIn} /> : isLoggedIn ? <NavbarSignIn setIsLoggedIn={setIsLoggedIn} /> : <NavbarNotSignIn />}
+      {isLoggedIn && (userRole === 'admin' || userRole === 'admin-root') ? <NavbarAdmin setIsLoggedIn={setIsLoggedIn} /> : isLoggedIn ? <NavbarSignIn setIsLoggedIn={setIsLoggedIn} /> : <NavbarNotSignIn />}
         <Routes>
           <Route path='/login' element={<SignIn/>}></Route>
           <Route path='/register' element={<SignUp/>}></Route>
           <Route path='/register-as-admin' element={<SignUpAdmin/>}></Route>
           <Route path="/" element={<MainCourse />} />
           <Route path="/handle-register" element={<HandleRegister />} />
-          <Route path='/createCourse' element={userRole === 'admin' ? <CreateCourse /> : <MainCourse />} />
-          <Route path='/createLesson' element={userRole === 'admin' ? <CreateLesson /> : <MainCourse />} />
-          <Route path='/typesDetail' element={userRole === 'admin' ? <TypeDetail /> : <MainCourse />} />
-          <Route path='/showCourse' element={userRole === 'admin' ? <ShowCourseAdmin /> : <MainCourse />} />
-          <Route path='/request-admin' element={userRole === 'admin' ? <AdminReqeust /> : <MainCourse />} />
-          <Route path='/editCourse/:courseId' element={userRole === 'admin' ? <EditCourse /> : <MainCourse />} />
+          <Route path='/createCourse' element={(userRole === 'admin' || userRole === 'admin-root') ? <CreateCourse /> : <MainCourse />} />
+          <Route path='/createLesson' element={(userRole === 'admin' || userRole === 'admin-root') ? <CreateLesson /> : <MainCourse />} />
+          <Route path='/typesDetail' element={(userRole === 'admin' || userRole === 'admin-root') ? <TypeDetail /> : <MainCourse />} />
+          <Route path='/showCourse' element={(userRole === 'admin' || userRole === 'admin-root') ? <ShowCourseAdmin /> : <MainCourse />} />
+          <Route path='/request-admin' element={userRole === 'admin-root' ? <AdminReqeust /> : <MainCourse />} />
+          <Route path='/editCourse/:courseId' element={(userRole === 'admin' || userRole === 'admin-root') ? <EditCourse /> : <MainCourse />} />
           <Route path='/courseDetail/:courseId' element={<CourseDetail/>}></Route>
           <Route path='/courseStudy/:courseId' element={<CourseStudy/>}></Route>
           <Route path='/editProfile/:userId' element={<EditProfile/>}></Route>
