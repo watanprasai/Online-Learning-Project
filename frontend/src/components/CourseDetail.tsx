@@ -58,7 +58,7 @@ function CourseDetail() {
     };
 
     const click_start = async () => {
-        navigate(`/courseStudy/${courseId}`);
+        navigate(`/StudyPage/0/${courseId}`);
     };
 
     const enroll_course = async () => {

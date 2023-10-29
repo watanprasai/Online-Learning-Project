@@ -55,7 +55,6 @@ function NavbarSignIn({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
     })
     .then(response => response.json())
       .then(data => {
-        console.log(data)
         setUserName(data.username)
       })
       .catch(error => {

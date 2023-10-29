@@ -1,20 +1,3 @@
-.progress-bar {
-    background-color: #ccc;
-    height: 20px;
-    border-radius: 5px;
-    margin-top: 20px;
-}
-
-.progress {
-    background-color: #007bff;
-    height: 100%;
-    border-radius: 5px;
-    transition: width 0.3s ease-in-out;
-    text-align: center;
-    line-height: 20px;
-    color: #fff;
-}
-
 .quiz-form-study {
     margin-top: 50px;
     background-color: #fff;
@@ -85,16 +68,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: #f0f0f0;
+    background-color: #D8D9DA;
     padding-bottom: 80px;
     gap: 20px;
 }
 
 .lesson-content-study {
-    background-color: #f0f0f0;
+    background-color: #D8D9DA;
     padding: 20px;
     border-radius: 5px;
     text-align: center;
+    width: 100%;
 }
 
 .lesson-content-study h1 {

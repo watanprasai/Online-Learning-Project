@@ -75,6 +75,7 @@ export interface Lesson {
   _id: string;
   course: Course;
   title: string;
+  scorePass: number;
   quizzes: Quiz[];
   content: string;
   videoURL: string;
