@@ -4,7 +4,7 @@ import { Course, Lesson, User, Type } from '../interfaces/ICourse';
 import { Link } from 'react-router-dom';
 
 function AllCourses() {
-
+    const [isSearch,setIsSearch] = useState(false);
     const [users, setUser] = useState<User[]>([]);
     const getUser = async() => {
         const apiUrl = "http://localhost:8080/users";
@@ -45,11 +45,6 @@ function AllCourses() {
 
     const [searchCourse, setSearchCourse] = useState('');
     const [selectedType, setSelectedType] = useState('');
-    const filteredCourse = courses.filter((course) => {
-        const titleMatch = course.title.includes(searchCourse);
-        const typeMatch = selectedType === '' || course.type._id === selectedType;
-        return titleMatch && typeMatch;
-    })
 
     const [types, setType] = useState<Type[]>([]);
     const getType = async() => {
@@ -95,7 +90,6 @@ function AllCourses() {
      const indexOfLastCourse: number = currentPage * itemsPerPage;
      const indexOfFirstCourse: number = indexOfLastCourse - itemsPerPage;
      const currentCourses: Course[] = courses.slice(indexOfFirstCourse, indexOfLastCourse);
- 
      const pageNumbers: number[] = [];
      for (let i = 1; i <= Math.ceil(courses.length / itemsPerPage); i++) {
          pageNumbers.push(i);
@@ -112,6 +106,24 @@ function AllCourses() {
           </Link>
         </li>
       ));
+
+      const [filteredCourses, setFilteredCourses] = useState<Course[]>(courses);
+      const filterCourses = () => {
+        const filtered = courses.filter((course) => {
+            const titleMatch = course.title.toLowerCase().includes(searchCourse.toLowerCase());
+            const typeMatch = selectedType === '' || course.type._id === selectedType;
+            return titleMatch && typeMatch;
+        });
+        setFilteredCourses(filtered);
+        setCurrentPage(1);
+        setIsSearch(true);
+    };
+
+    const handleReset = () => {
+        setIsSearch(false);
+        setSelectedType("");
+        setSearchCourse("");
+    };
     
     useEffect(() => {
         getUser();
@@ -135,20 +147,34 @@ function AllCourses() {
                     ))}
                 </select>
                 <input type="text" id='type' name='type' placeholder='ค้นหา Course' value={searchCourse} onChange={(event) => setSearchCourse(event.target.value)} />
+                <button onClick={filterCourses} className='all-course-search-button'>ค้นหา</button>
+                <button onClick={handleReset} className='all-course-reset-button'>รีเซ็ท</button>
             </div>
             <ul className='page-numbers-top'>
                 {renderPageNumbers}
             </ul>
             <div className='course-grid-allcourse'>
-                {currentCourses.map((course) => (
-                    <div className='course-item-allcourse' key={course._id}>
-                        <img src={require(`../files/${course.url}`)} alt={course.title} />
-                        <h4>{course.title}</h4>
-                        <Link to={`/courseDetail/${course._id}`}>
-                            <button>ดูรายละเอียด</button>
-                        </Link>
-                    </div>
-                ))}
+                {isSearch ? (
+                    filteredCourses.map((course) => (
+                        <div className='course-item-allcourse' key={course._id}>
+                            <img src={require(`../files/${course.url}`)} alt={course.title} />
+                            <h4>{course.title}</h4>
+                            <Link to={`/courseDetail/${course._id}`}>
+                                <button>ดูรายละเอียด</button>
+                            </Link>
+                        </div>
+                    ))
+                ) : (
+                    currentCourses.map((course) => (
+                        <div className='course-item-allcourse' key={course._id}>
+                            <img src={require(`../files/${course.url}`)} alt={course.title} />
+                            <h4>{course.title}</h4>
+                            <Link to={`/courseDetail/${course._id}`}>
+                                <button>ดูรายละเอียด</button>
+                            </Link>
+                        </div>
+                    ))
+                )}
             </div>
             <ul className='page-numbers-bottom'>
                 {renderPageNumbers}
