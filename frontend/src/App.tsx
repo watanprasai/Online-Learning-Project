@@ -60,7 +60,7 @@ function App() {
           <Route path="/handle-register" element={<HandleRegister />} />
           <Route path='/createCourse' element={(userRole === 'admin' || userRole === 'admin-root') ? <CreateCourse /> : <MainCourse />} />
           <Route path='/createLesson' element={(userRole === 'admin' || userRole === 'admin-root') ? <CreateLesson /> : <MainCourse />} />
-          <Route path='/typesDetail' element={(userRole === 'admin' || userRole === 'admin-root') ? <TypeDetail /> : <MainCourse />} />
+          <Route path='/typesDetail' element={userRole === 'admin-root'  ? <TypeDetail /> : <MainCourse />} />
           <Route path='/showCourse' element={(userRole === 'admin' || userRole === 'admin-root') ? <ShowCourseAdmin /> : <MainCourse />} />
           <Route path='/request-admin' element={userRole === 'admin-root' ? <AdminReqeust /> : <MainCourse />} />
           <Route path='/editCourse/:courseId' element={(userRole === 'admin' || userRole === 'admin-root') ? <EditCourse /> : <MainCourse />} />

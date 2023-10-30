@@ -126,11 +126,13 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
                     <EditIcon style={{ color: '#FF5733' }} />
                 </Link>
             </IconButton>
-            <IconButton>
-                <Link to='/typesDetail' style={{ textDecoration: 'none' }}>
-                    <CategoryIcon style={{ color: '#FF5733' }} />
-                </Link>
-            </IconButton>
+            {userRole === 'admin-root' && (
+                <IconButton>
+                    <Link to='/typesDetail' style={{ textDecoration: 'none' }}>
+                        <CategoryIcon style={{ color: '#FF5733' }} />
+                    </Link>
+                </IconButton>
+            )}
             <IconButton>
                 <Link to='/createCourse'>
                 <AddCircleIcon style={{ color: '#FF5733' }} />
@@ -166,7 +168,9 @@ function  NavbarAdmin({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => vo
                 <MenuItem onClick={clickMyCourses}>คอร์สเรียนของฉัน</MenuItem>
                 <MenuItem onClick={clickCreateCourse}>สร้างคอร์ส</MenuItem>
                 <MenuItem onClick={clickEditCourse}>แก้ไขคอร์ส</MenuItem>
-                <MenuItem onClick={clickEditType}>แก้ไขประเภท</MenuItem>
+                {userRole === 'admin-root' && (
+                    <MenuItem onClick={clickEditType}>แก้ไขประเภท</MenuItem>
+                )}
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
             </Toolbar>
