@@ -35,7 +35,7 @@ function CertificateCanvas({ courseTitle, studentName }: any) {
         context.fillText('เราขอยินดีที่ประกาศว่า', 100, 150);
         context.fillText(studentName, 100, 190);
         context.font = 'italic 18px Arial';
-        context.fillText('ได้เรียนคอร์สนี้เสร็จเรียบร้อยแล้ว', 100, 250);
+        context.fillText('ได้เรียนคอร์สนี้เกิน 80% ของเวลาเรียนทั้งหมดแล้ว', 100, 250);
         context.fillText(`ในคอร์ส ${courseTitle}`, 100, 280);
       }
     }
