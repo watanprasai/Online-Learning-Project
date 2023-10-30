@@ -1246,8 +1246,11 @@ app.put('/lessons/:id', async (req,res) => {
     }
 });
 
-app.delete('/lessons/:id', async (req,res) =>{
+app.delete('/lessons/:id/:courseId', async (req,res) =>{
     try {
+        const lessonId = req.params.id;
+        const courseId = req.params.courseId;
+        await Course.findByIdAndUpdate(courseId, { $pull: { lessons: lessonId }});
         await Lesson.findByIdAndDelete(req.params.id);
         res.json({ message: 'Lesson deleted successfully'});
     }catch (error){

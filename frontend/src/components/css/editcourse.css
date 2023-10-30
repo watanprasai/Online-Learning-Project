@@ -100,3 +100,31 @@ ul ,li {
     color: black;
     background-color: rgb(204, 39, 39);
 }
+
+.edit-course-add-lesson-button {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-right: 20px;
+}
+
+.edit-course-add-lesson-button button {
+    height: 40px;
+    width: 100px;
+    color: white;
+    background-color: #007BFF;
+    border: 0px;
+    border-radius: 10px;
+    transition: all 0.5s;
+    cursor: pointer;
+}
+
+.edit-course-add-lesson-button button:hover {
+    background-color: #0056b3;
+}
+
+.edit-course-course-button-line-single {
+    padding-right: 20px;
+}

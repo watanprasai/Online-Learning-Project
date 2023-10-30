@@ -22,6 +22,7 @@ import HandleRegister from './components/HandleRegister';
 import SignUpAdmin from './components/SignUpAdmin';
 import AdminReqeust from './components/AdminRequest';
 import StudyPage from './components/StudyPage';
+import AddLesson from './components/AddLesson';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -60,6 +61,7 @@ function App() {
           <Route path="/handle-register" element={<HandleRegister />} />
           <Route path='/createCourse' element={(userRole === 'admin' || userRole === 'admin-root') ? <CreateCourse /> : <MainCourse />} />
           <Route path='/createLesson' element={(userRole === 'admin' || userRole === 'admin-root') ? <CreateLesson /> : <MainCourse />} />
+          <Route path='/addLesson/:courseId' element={(userRole === 'admin' || userRole === 'admin-root') ? <AddLesson /> : <MainCourse />} />
           <Route path='/typesDetail' element={userRole === 'admin-root'  ? <TypeDetail /> : <MainCourse />} />
           <Route path='/showCourse' element={(userRole === 'admin' || userRole === 'admin-root') ? <ShowCourseAdmin /> : <MainCourse />} />
           <Route path='/request-admin' element={userRole === 'admin-root' ? <AdminReqeust /> : <MainCourse />} />

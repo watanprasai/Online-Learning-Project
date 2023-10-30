@@ -3,7 +3,7 @@ import { useParams , useNavigate } from 'react-router-dom';
 import { Course, Lesson, Type, User ,Quiz} from '../interfaces/ICourse';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave, faPlus , faTrash} from '@fortawesome/free-solid-svg-icons';
+import { faSave, faPlus , faTrash , faBook} from '@fortawesome/free-solid-svg-icons';
 import './css/editcourse.css'
 
 function EditCourse() {
@@ -570,6 +570,94 @@ function EditCourse() {
             .map((deletedItem:any) => deletedItem._id);
         return deletedIds;
     }
+
+    const handleDeleteQuiz = (index:number) => {
+        Swal.fire({
+            title: 'คุณแน่ใจที่จะลบแบบทดสอบนี้?',
+            text: 'แบบทดสอบที่ลบจะไม่สามารถกู้คืนได้',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ใช่, ลบแบบทดสอบ',
+            cancelButtonText: 'ยกเลิก',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const lessonId = lessons[index]._id;
+                const apiUrl = `http://localhost:8080/lessons/${lessonId}/${courseId}`;
+                const option = {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `${token}`,
+                    },
+                };
+                fetch(apiUrl,option)
+                .then((res) => res.json())
+                .then((res) => {
+                    if (res.message === 'Lesson deleted successfully') {
+                        Swal.fire({
+                            title: 'ลบแบบทดสอบสำเร็จ',
+                            text: 'แบบทดสอบถูกลบแล้ว',
+                            icon: 'success',
+                            confirmButtonText: 'ตกลง',
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'เกิดข้อผิดพลาดในการลบแบบทดสอบ',
+                            text: 'ไม่สามารถลบแบบทดสอบได้',
+                            icon: 'error',
+                            confirmButtonText: 'ตกลง',
+                        });
+                    }
+                })
+            }
+        });
+    }
+
+    const handleDeleteVideo = (index:number) => {
+        Swal.fire({
+            title: 'คุณแน่ใจที่จะลบวิดีโอนี้?',
+            text: 'วิดีโอที่ลบจะไม่สามารถกู้คืนได้',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ใช่, ลบวิดีโอ',
+            cancelButtonText: 'ยกเลิก',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const lessonId = lessons[index]._id;
+                const apiUrl = `http://localhost:8080/lessons/${lessonId}/${courseId}`;
+                const option = {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `${token}`,
+                    },
+                };
+                fetch(apiUrl,option)
+                .then((res) => res.json())
+                .then((res) => {
+                    if (res.message === 'Lesson deleted successfully') {
+                        Swal.fire({
+                            title: 'ลบวิดีโอสำเร็จ',
+                            text: 'วิดีโอถูกลบแล้ว',
+                            icon: 'success',
+                            confirmButtonText: 'ตกลง',
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'เกิดข้อผิดพลาดในการลบวิดีโอ',
+                            text: 'ไม่สามารถลบวิดีโอได้',
+                            icon: 'error',
+                            confirmButtonText: 'ตกลง',
+                        });
+                    }
+                })
+            }
+        });
+    }
     
     const updateQuiz = async (index:number) => {
         lessons[index].quizzes.map((quiz,quizIndex) => {
@@ -717,6 +805,10 @@ function EditCourse() {
         });
     };
 
+    const addLessonClick = () => {
+        navigate(`/addLesson/${courseId}`)
+    };
+
     useEffect(() => {
         getCourse();
         getType();
@@ -782,7 +874,14 @@ function EditCourse() {
                         รูปปก
                         <input type="file" id="file" name="file" accept="image/*" onChange={handleFileChange} />
                     </div>
-                    
+
+                    <div className="edit-course-course-button-line-single">
+                         <div className="edit-course-add-lesson-button">
+                            <button onClick={addLessonClick}>
+                                เพิ่มเนื้อหา <FontAwesomeIcon icon={faBook} />
+                            </button>
+                        </div>
+                    </div>
                     <div className="edit-course-course-button-line">
                          <div className="edit-course-update-button">
                             <button onClick={submit}>
@@ -901,6 +1000,9 @@ function EditCourse() {
                                                         </div>
                                                     )}
                                                     <div className="course-create-button">
+                                                        <button onClick={() => handleDeleteQuiz(index)} style={{ marginRight: '5px', backgroundColor: 'rgb(236, 68, 68)'}}>
+                                                            ลบควิซ <FontAwesomeIcon icon={faTrash} />
+                                                        </button>
                                                         <button onClick={() => updateQuiz(index)}>
                                                             แก้ไขควิซ <FontAwesomeIcon icon={faSave} />
                                                         </button>
@@ -937,6 +1039,9 @@ function EditCourse() {
                                                     <input type="file" id='video' name='video' onChange={handleVideoChange} accept="video/*" />
                                                 </div>
                                                 <div className="course-create-button">
+                                                    <button onClick={() => handleDeleteVideo(index)} style={{ marginRight: '5px', backgroundColor: 'rgb(236, 68, 68)'}}>
+                                                         ลบวิดีโอ <FontAwesomeIcon icon={faTrash} />
+                                                    </button>
                                                     <button onClick={() => submitLesson(index)}>
                                                         แก้ไข <FontAwesomeIcon icon={faSave} />
                                                     </button>
