@@ -77,6 +77,14 @@ function CreateCourse() {
     }
 
     const submit = async() => {
+        if (!title || !description || !file || !selectedType) {
+            Swal.fire({
+                title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+                icon: 'warning',
+                confirmButtonText: 'ตกลง',
+            });
+            return;
+        }
         setIsLoading(true);
         const photo = new FormData();
         photo.append('file', file || "");

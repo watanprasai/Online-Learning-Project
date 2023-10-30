@@ -405,6 +405,14 @@ function CreateLesson() {
     }
 
     const submit = async () => {
+        if (!lessonTitle || !content || !videoFile) {
+            Swal.fire({
+                title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+                icon: 'warning',
+                confirmButtonText: 'ตกลง',
+            });
+            return;
+        }
         setIsLoading(true);
         const video = new FormData();
         video.append('file', videoFile || "");
