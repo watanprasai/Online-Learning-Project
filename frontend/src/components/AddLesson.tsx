@@ -3,13 +3,13 @@ import './css/createcourse.css'
 import { useEffect, useState } from 'react';
 import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faSave, faPlus, faL } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 
 function AddLesson () {
     const {courseId} = useParams();
     const token = localStorage.getItem('token') || "";
-
+    const [isLoading, setIsLoading] = useState(true);
     const [lessonTitle, setLessonTitle] = useState('');
     const [content, setContent] = useState('');
     const [scorePass , setScorePass] = useState('');
@@ -52,6 +52,14 @@ function AddLesson () {
             if (!lessonTitle || questions.length === 0) {
                 Swal.fire({
                     title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+                    icon: 'warning',
+                    confirmButtonText: 'ตกลง',
+                });
+                return;
+            }
+            if (!scorePass) {
+                Swal.fire({
+                    title: 'กรุณากรอกเกณฑ์การผ่าน',
                     icon: 'warning',
                     confirmButtonText: 'ตกลง',
                 });
@@ -156,7 +164,7 @@ function AddLesson () {
                     correctOption: '',
                 },
             ]);
-            
+            setScorePass('');
     
             await Swal.fire({
                 title: 'สร้าง Quiz สำเร็จ',
@@ -375,6 +383,7 @@ function AddLesson () {
 
     const [course, setCourse] = useState<Course>();
     const getCourseByID = async () => {
+        setIsLoading(true);
         const apiUrl = `http://localhost:8080/courses/${courseId}`;
         const option = {
             method: "GET",
@@ -390,9 +399,11 @@ function AddLesson () {
                     alert("Can not get course by _id");
                 }
             })
+        setIsLoading(false);
     }
 
     const submit = async () => {
+        setIsLoading(true);
         const video = new FormData();
         video.append('file', videoFile || "");
         const apiUrlUpload = "http://localhost:8080/upload";
@@ -434,6 +445,7 @@ function AddLesson () {
                 confirmButtonText: 'รับทราบ'
             });
         }
+        setIsLoading(false);
     }
     const [selectedOption, setSelectedOption] = useState('video');
 
@@ -518,65 +530,71 @@ function AddLesson () {
 
     return (
         <div className="page2-lesson">
-            <div className='header'>
-                Lesson Create
-            </div>
-            <div className="course-create-container">
-                <div className='course-line'>
-                    หัวข้อ
-                    <input type="text" id='title' name='title' placeholder='กรอกหัวข้อ' value={course?.title} disabled={true}  />
-                </div>
-                <div className='course-line'>
-                    คำอธิบาย
-                    <input type="text" id="description" name='description' placeholder='กรอกคำอธิบาย' value={course?.description} disabled={true}  />
-                </div>
-                <div className='course-line'>
-                    ครูผู้สอน
-                    <input type="text" id='instructor' name='instructor' placeholder='กรอกชื่อครูผู้สอน' value={course?.instructor.username} disabled={true}  />
-                </div>
-                <div className='course-line'>
-                    หมวดหมู่
-                    <select name="types" id="types" disabled={true}>
-                        <option value="" >{course?.type.name}</option>
-                    </select>
-                </div>
-                <div className='course-line'>
-                    รูปปก
-                    <input type="text" id='url' name='url' placeholder='กรอก url รูปหน้าปก' value={course?.url} disabled={true}  />
-                </div>
-                <hr className="line-divider" />
-                <div className="lesson-line">
-                    เนื้อหาการสอน
-                    <div className='lesson-choice'>
-                        <div className='lesson-choice-line'>
-                            <input
-                                className="lesson-radio"
-                                type="radio"
-                                name="lessonType"
-                                value="video"
-                                checked={selectedOption === 'video'}
-                                onChange={handleAddVideo}
-                            />
-                            เพิ่มวิดีโอ (video)
-                        </div>
-                        <div className='lesson-choice-line'>
-                            <input
-                                className="lesson-radio"
-                                type="radio"
-                                name="lessonType"
-                                value="quiz"
-                                checked={selectedOption === 'quiz'}
-                                onChange={handleAddQuiz}
-                            />
-                            สร้างคำถาม (quiz)
-                        </div>
-                    </div>
-                </div>
+            {isLoading?(
+                <div className="loading-spinner"></div>
+            ):(
                 <div>
-                    {selectedOption === 'video' ? addVideoForm() : null}
-                    {selectedOption === 'quiz' ? createQuizForm() : null}
+                        <div className='header'>
+                            Lesson Create
+                        </div>
+                        <div className="course-create-container">
+                            <div className='course-line'>
+                                หัวข้อ
+                                <input type="text" id='title' name='title' placeholder='กรอกหัวข้อ' value={course?.title} disabled={true}  />
+                            </div>
+                            <div className='course-line'>
+                                คำอธิบาย
+                                <input type="text" id="description" name='description' placeholder='กรอกคำอธิบาย' value={course?.description} disabled={true}  />
+                            </div>
+                            <div className='course-line'>
+                                ครูผู้สอน
+                                <input type="text" id='instructor' name='instructor' placeholder='กรอกชื่อครูผู้สอน' value={course?.instructor.username} disabled={true}  />
+                            </div>
+                            <div className='course-line'>
+                                หมวดหมู่
+                                <select name="types" id="types" disabled={true}>
+                                    <option value="" >{course?.type.name}</option>
+                                </select>
+                            </div>
+                            <div className='course-line'>
+                                รูปปก
+                                <input type="text" id='url' name='url' placeholder='กรอก url รูปหน้าปก' value={course?.url} disabled={true}  />
+                            </div>
+                            <hr className="line-divider" />
+                            <div className="lesson-line">
+                                เนื้อหาการสอน
+                                <div className='lesson-choice'>
+                                    <div className='lesson-choice-line'>
+                                        <input
+                                            className="lesson-radio"
+                                            type="radio"
+                                            name="lessonType"
+                                            value="video"
+                                            checked={selectedOption === 'video'}
+                                            onChange={handleAddVideo}
+                                        />
+                                        เพิ่มวิดีโอ (video)
+                                    </div>
+                                    <div className='lesson-choice-line'>
+                                        <input
+                                            className="lesson-radio"
+                                            type="radio"
+                                            name="lessonType"
+                                            value="quiz"
+                                            checked={selectedOption === 'quiz'}
+                                            onChange={handleAddQuiz}
+                                        />
+                                        สร้างคำถาม (quiz)
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                {selectedOption === 'video' ? addVideoForm() : null}
+                                {selectedOption === 'quiz' ? createQuizForm() : null}
+                            </div>
+                        </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }

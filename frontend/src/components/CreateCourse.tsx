@@ -10,7 +10,7 @@ function CreateCourse() {
     const _id = localStorage.getItem('_id') || "";
     const navigate = useNavigate();
     const [user , setUser] = useState<User>();
-
+    const [isLoading, setIsLoading] = useState(true);
     const [file, setFile] = useState(null);
 
     const handleFileChange = (event: any) => {
@@ -38,6 +38,7 @@ function CreateCourse() {
     const [types, setType] = useState<Type[]>([]);
     const [selectedType, setSelectedType] = useState('');
     const getType = () => {
+        setIsLoading(true);
         const apiUrl = "http://localhost:8080/types";
         const option = {
             method: "GET",
@@ -53,8 +54,10 @@ function CreateCourse() {
                 alert("Can not get types");
             }
         })
+        setIsLoading(false);
     }
     const getUserbyID = () => {
+        setIsLoading(true);
         const apiUrl = `http://localhost:8080/users/${_id}`;
         const option = {
             method : "GET",
@@ -70,10 +73,11 @@ function CreateCourse() {
                 alert("Can not get user by _id");
             }
         })
+        setIsLoading(false);
     }
 
     const submit = async() => {
-
+        setIsLoading(true);
         const photo = new FormData();
         photo.append('file', file || "");
         const apiUrlUpload = "http://localhost:8080/upload";
@@ -116,6 +120,7 @@ function CreateCourse() {
                 confirmButtonText: 'รับทราบ'
             });
         }
+        setIsLoading(false);
     }
 
     useEffect(() => {
@@ -125,42 +130,47 @@ function CreateCourse() {
 
     return (
         <div className="page2">
-            <div className='header'>
-                Course Create
-            </div>
-            <div className="course-create-container">
-                <div className='course-line'>
-                    หัวข้อ 
-                    <input type="text" id='title' name='title' placeholder='กรอกหัวข้อ' value={title} onChange={(event) => setTitle(event.target.value)}/>
+            {isLoading?(<div className="loading-spinner"></div>) :(
+                <div>
+                        <div className='header'>
+                    Course Create
                 </div>
-                <div className='course-line'>
-                    คำอธิบาย
-                    <input type="text" id="description" name='description' placeholder='กรอกคำอธิบาย' value={description} onChange={(event) => setDescription(event.target.value)}/>
+                <div className="course-create-container">
+                    <div className='course-line'>
+                        หัวข้อ 
+                        <input type="text" id='title' name='title' placeholder='กรอกหัวข้อ' value={title} onChange={(event) => setTitle(event.target.value)}/>
+                    </div>
+                    <div className='course-line'>
+                        คำอธิบาย
+                        <input type="text" id="description" name='description' placeholder='กรอกคำอธิบาย' value={description} onChange={(event) => setDescription(event.target.value)}/>
+                    </div>
+                    <div className='course-line'>
+                        ครูผู้สอน
+                        <input type="text" id='instructor' name='instructor' placeholder='กรอกชื่อครูผู้สอน' value={user?.username} disabled/>
+                    </div>
+                    <div className='course-line'>
+                        หมวดหมู่
+                        <select name="types" id="types" value={selectedType} onChange={(event) => setSelectedType(event.target.value)}>
+                            <option value="">กรุณาเลือกหมวดหมู่</option>
+                            {types.map((type) => (
+                                <option key={type._id} value={type._id}>
+                                    {type.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className='course-line-upload'>
+                        รูปปก
+                        <br />( jpeg, png )
+                        <input type="file" id='file' name='file' accept="image/jpeg, image/png" onChange={handleFileChange} />
+                    </div>
+                    <div className="course-create-button">
+                        <button onClick={submit}>บันทึก <FontAwesomeIcon icon={faSave} /></button>
+                    </div>
                 </div>
-                <div className='course-line'>
-                    ครูผู้สอน
-                    <input type="text" id='instructor' name='instructor' placeholder='กรอกชื่อครูผู้สอน' value={user?.username} disabled/>
                 </div>
-                <div className='course-line'>
-                    หมวดหมู่
-                    <select name="types" id="types" value={selectedType} onChange={(event) => setSelectedType(event.target.value)}>
-                        <option value="">กรุณาเลือกหมวดหมู่</option>
-                        {types.map((type) => (
-                            <option key={type._id} value={type._id}>
-                                {type.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className='course-line-upload'>
-                    รูปปก
-                    <br />( jpeg, png )
-                    <input type="file" id='file' name='file' accept="image/jpeg, image/png" onChange={handleFileChange} />
-                </div>
-                <div className="course-create-button">
-                    <button onClick={submit}>บันทึก <FontAwesomeIcon icon={faSave} /></button>
-                </div>
-            </div>
+            )}
+            
         </div>
     );
 }
